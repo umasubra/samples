@@ -1,0 +1,24 @@
+- name: Basic API call
+  description: Colors the selected range in yellow.
+  gist: >-
+    https://raw.githubusercontent.com/WrathOfZombies/samples/master/samples/excel/Basics/basic-api-call.yaml
+  group: Basics
+- name: Range basics
+  description: Explores the most common Range APIs
+  gist: >-
+    https://raw.githubusercontent.com/WrathOfZombies/samples/master/samples/excel/Basics/range.yaml
+  group: Basics
+- name: API call with Fabric notification toast
+  description: >-
+    Highlights the currently-selected range and reports its address via a
+    Fabric-based notification toast.
+  gist: >-
+    https://raw.githubusercontent.com/WrathOfZombies/samples/master/samples/excel/general-starter-templates/api-call-with-notification-toast.yaml
+  group: General Starter Templates
+- name: Report generation
+  description: >-
+    Writes data to the workbook, reads and applies basic formatting, and adds a
+    chart bound to that data.
+  gist: >-
+    https://raw.githubusercontent.com/WrathOfZombies/samples/master/samples/excel/general-starter-templates/report-generation.yaml
+  group: General Starter Templates
