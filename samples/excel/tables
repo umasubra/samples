@@ -1,0 +1,123 @@
+id: ''
+gist: ''
+source: EXCEL
+author: Microsoft
+name: Create a table
+description: Creates a table with three columns and four rows.
+script:
+  content: |-
+    $('#create-table').click(createTable);
+
+    /** Create a new table with some sample data */
+    function createTable() {
+        Excel.run(async (context) => {
+            let sheet: Excel.Worksheet;
+            try {
+                // If sheet already exists, queue a command to delete it
+                context.workbook.worksheets.getItem("Playground").delete();
+
+                // Then create a proxy object for a new worksheet
+                sheet = context.workbook.worksheets.add("Playground");
+
+                // Call the helper to create the table
+                await queueCreateTable(sheet);
+
+                //Queue a command to activate the sheet
+                sheet.activate();
+
+                // Run all of the queued up commands
+                await context.sync();
+            }
+            catch (error) {
+                // Try to activate the new sheet regardless, to show
+                // how far the processing got before failing
+                sheet.activate();
+                await context.sync();
+
+                // Then re-throw the original error, for appropriate error-handling
+                // (in this snippet, simply showing a notification)
+                throw error;
+            }
+        })
+        .then(() => showNotification("Success", "Table creation complete!"))
+        .catch(handleError);
+
+        // Helper functions:
+
+        // Creates the table
+        async function queueCreateTable(sheet: Excel.Worksheet) {
+
+            // Queue a command to add a table to the sheet
+            let expensesTable = sheet.tables.add('A1:D1', true);
+            expensesTable.name = "ExpensesTable";
+
+            // Queue a command to set the header row
+            expensesTable.getHeaderRowRange().values = [["DATE", "MERCHANT", "CATEGORY", "AMOUNT"]];
+
+            // Queue a command to add rows to the table
+            expensesTable.rows.add(null, [
+                ["1/1/2017", "THE PHONE COMPANY", "Communications", "$120"],
+                ["1/2/2017", "NORTHWIND ELECTRIC CARS", "Transportation", "$142"],
+                ["1/5/2017", "BEST FOR YOU ORGANICS COMPANY", "Groceries", "$27"],
+                ["1/10/2017", "COHO VINEYARD", "Restaurant", "$33"],
+                ["1/11/2017", "BELLOWS COLLEGE", "Education", "$350"],
+                ["1/15/2017", "TREY RESEARCH", "Other", "$135"],
+                ["1/15/2017", "BEST FOR YOU ORGANICS COMPANY", "Groceries", "$97"]
+            ]);  
+
+            //Autofit columns and rows
+            sheet.getUsedRange().getEntireColumn().format.autofitColumns();
+            sheet.getUsedRange().getEntireRow().format.autofitRows();
+        }
+    }
+
+    function handleError(error) {
+        showNotification("Error", error);
+        OfficeHelpers.Utilities.log(error);
+    }
+
+    function showNotification(header, text) {
+        let container = document.getElementById('notification-popup');
+        let headerPlaceholder = container.querySelector('.notification-popup-title');
+        let textPlaceholder = container.querySelector('.ms-MessageBanner-clipper');
+
+        headerPlaceholder.textContent = header;
+        textPlaceholder.textContent = text;
+
+        let closeButton = container.querySelector('.ms-MessageBanner-close');
+        closeButton.addEventListener("click", function () {
+            if (container.className.indexOf("hide") === -1) {
+                container.className = "ms-MessageBanner is-hidden";
+            }
+            closeButton.removeEventListener("click", null);
+        });
+
+        container.className = "ms-MessageBanner is-expanded";
+    }
+  language: typescript
+style:
+  content: /* Your style goes here */
+  language: css
+template:
+  content: |-
+    <button id="create-table" class="ms-Button">
+        <span class="ms-Button-label">Create a table</span>
+    </button>
+  language: html
+libraries: |-
+  // Office.js
+  https://appsforoffice.microsoft.com/lib/1/hosted/Office.js
+
+  // NPM libraries
+  jquery
+  office-ui-fabric-js/dist/js/fabric.min.js
+  office-ui-fabric-js/dist/css/fabric.min.css
+  office-ui-fabric-js/dist/css/fabric.components.min.css
+  @microsoft/office-js-helpers/dist/office.helpers.min.js
+  core-js/client/core.min.js
+
+  // IntelliSense: Use dt~library_name for DefinitelyTyped or URLs to d.ts files
+  dt~office-js
+  dt~jquery
+  dt~core-js
+  @microsoft/office-js-helpers/dist/office.helpers.d.ts
