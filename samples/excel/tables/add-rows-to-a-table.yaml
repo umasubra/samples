@@ -1,0 +1,190 @@
+id: ''
+gist: ''
+source: EXCEL
+author: Microsoft
+name: Add rows to a table
+description: Add rows to a table
+script:
+  content: |
+    $('#create-table').click(createTable);
+    $('#add-rows').click(addRows);
+
+    /** Create a new table with some sample data */
+    function createTable() {
+        Excel.run(async (context) => {
+            let sheet: Excel.Worksheet;
+            try {
+                // If sheet already exists, queue a command to delete it
+                context.workbook.worksheets.getItem("Playground").delete();
+
+                // Then create a proxy object for a new worksheet
+                sheet = context.workbook.worksheets.add("Playground");
+
+                // Call the helper to create the table
+                await queueCreateTable(sheet);
+
+                //Queue a command to activate the sheet
+                sheet.activate();
+
+                // Run all of the queued up commands
+                await context.sync();
+            }
+            catch (error) {
+                // Try to activate the new sheet regardless, to show
+                // how far the processing got before failing
+                sheet.activate();
+                await context.sync();
+
+                // Then re-throw the original error, for appropriate error-handling
+                // (in this snippet, simply showing a notification)
+                throw error;
+            }
+        })
+        .catch(handleError);
+    }
+
+
+    /** Add rows to an existing table */
+    function addRows() {
+        Excel.run(async (context) => {
+            let sheet: Excel.Worksheet;
+            try {
+                // Queue a command to get the sheet
+                sheet = context.workbook.worksheets.getItem("Playground");
+
+                console.log("inside");
+                
+                // Call the helper to sort the table
+                await queueAddRows(sheet);
+
+                // Run all of the queued up commands
+                await context.sync();
+            }
+            catch (error) {
+                // Try to activate the new sheet regardless, to show
+                // how far the processing got before failing
+                sheet.activate();
+                await context.sync();
+
+                // Then re-throw the original error, for appropriate error-handling
+                // (in this snippet, simply showing a notification)
+                throw error;
+            }
+        })
+        .catch(handleError);
+    }
+      // Helper functions:
+
+        // Creates the table
+        async function queueCreateTable(sheet: Excel.Worksheet) {
+
+            // Queue a command to add a table to the sheet
+            let expensesTable = sheet.tables.add('A1:D1', true);
+            expensesTable.name = "ExpensesTable";
+
+            // Queue a command to set the header row
+            expensesTable.getHeaderRowRange().values = [["DATE", "MERCHANT", "CATEGORY", "AMOUNT"]];
+
+            // Queue a command to add rows to the table
+            expensesTable.rows.add(null, [
+                ["1/1/2017", "THE PHONE COMPANY", "Communications", "$120"],
+                ["1/2/2017", "NORTHWIND ELECTRIC CARS", "Transportation", "$142"],
+                ["1/5/2017", "BEST FOR YOU ORGANICS COMPANY", "Groceries", "$27"],
+                ["1/10/2017", "COHO VINEYARD", "Restaurant", "$33"],
+                ["1/11/2017", "BELLOWS COLLEGE", "Education", "$350"],
+                ["1/15/2017", "TREY RESEARCH", "Other", "$135"],
+                ["1/15/2017", "BEST FOR YOU ORGANICS COMPANY", "Groceries", "$97"]
+            ]);  
+
+            // Queue a command to set the number format of the Amount column
+             //expensesTable.columns.getItem("AMOUNT").numberFormat = "$#";
+
+            //Autofit columns and rows
+            sheet.getUsedRange().getEntireColumn().format.autofitColumns();
+            sheet.getUsedRange().getEntireRow().format.autofitRows();
+        }
+
+        // Sort the table data
+        async function queueAddRows(sheet: Excel.Worksheet) {
+                    console.log("inside");
+
+            // Queue a command to get the table
+            const expensesTable = sheet.tables.getItem("ExpensesTable");
+
+
+
+            // Queue a command to add additional rows to the table
+            expensesTable.rows.add(null, [
+                ["1/16/2017", "THE PHONE COMPANY", "Communications", "$120"],
+                ["1/20/2017", "NORTHWIND ELECTRIC CARS", "Transportation", "$142"],
+                ["1/20/2017", "BEST FOR YOU ORGANICS COMPANY", "Groceries", "$27"],
+                ["1/21/2017", "COHO VINEYARD", "Restaurant", "$33"],
+                ["1/25/2017", "BELLOWS COLLEGE", "Education", "$350"],
+                ["1/28/2017", "TREY RESEARCH", "Other", "$135"],
+                ["1/31/2017", "BEST FOR YOU ORGANICS COMPANY", "Groceries", "$97"]
+            ]); 
+
+
+        }
+
+    function handleError(error) {
+        showNotification("Error", error);
+        OfficeHelpers.Utilities.log(error);
+    }
+
+    function showNotification(header, text) {
+        let container = document.getElementById('notification-popup');
+        let headerPlaceholder = container.querySelector('.notification-popup-title');
+        let textPlaceholder = container.querySelector('.ms-MessageBanner-clipper');
+
+        headerPlaceholder.textContent = header;
+        textPlaceholder.textContent = text;
+
+        let closeButton = container.querySelector('.ms-MessageBanner-close');
+        closeButton.addEventListener("click", function () {
+            if (container.className.indexOf("hide") === -1) {
+                container.className = "ms-MessageBanner is-hidden";
+            }
+            closeButton.removeEventListener("click", null);
+        });
+
+        container.className = "ms-MessageBanner is-expanded";
+    }
+  language: typescript
+style:
+  content: ".ms-Button {\r\n    padding: 10px;\r\n    margin:10px;\r\n}\r\n"
+  language: css
+template:
+  content: |
+    <div id="content-header" class="ms-font-m">
+        <h1>Welcome</h1>
+    </div>
+
+    <div id="content-main" class="ms-font-m">
+        <p>This sample shows how to add rows to an existing table using the Excel JavaScript API.</p>
+        <h3>Try it out</h3>
+            <button id="create-table" class="ms-Button">
+            <span class="ms-Button-label">Step 1: Create table</span>
+        </button>
+        <button id="add-rows" class="ms-Button">
+            <span class="ms-Button-label">Step 2: Add new rows</span>
+        </button>
+    </div>
+  language: html
+libraries: |-
+  // Office.js
+  https://appsforoffice.microsoft.com/lib/1/hosted/Office.js
+
+  // NPM libraries
+  jquery
+  office-ui-fabric-js/dist/js/fabric.min.js
+  office-ui-fabric-js/dist/css/fabric.min.css
+  office-ui-fabric-js/dist/css/fabric.components.min.css
+  @microsoft/office-js-helpers/dist/office.helpers.min.js
+  core-js/client/core.min.js
+
+  // IntelliSense: Use dt~library_name for DefinitelyTyped or URLs to d.ts files
+  dt~office-js
+  dt~jquery
+  dt~core-js
+  @microsoft/office-js-helpers/dist/office.helpers.d.ts
