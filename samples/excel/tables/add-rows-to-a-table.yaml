@@ -5,7 +5,7 @@ author: Microsoft
 name: Add rows to a table
 description: Add rows to a table
 script:
-  content: |
+  content: |+
     $('#create-table').click(createTable);
     $('#add-rows').click(addRows);
 
@@ -52,8 +52,6 @@ script:
                 // Queue a command to get the sheet
                 sheet = context.workbook.worksheets.getItem("Playground");
 
-                console.log("inside");
-                
                 // Call the helper to sort the table
                 await queueAddRows(sheet);
 
@@ -106,12 +104,9 @@ script:
 
         // Sort the table data
         async function queueAddRows(sheet: Excel.Worksheet) {
-                    console.log("inside");
 
             // Queue a command to get the table
             const expensesTable = sheet.tables.getItem("ExpensesTable");
-
-
 
             // Queue a command to add additional rows to the table
             expensesTable.rows.add(null, [
@@ -123,33 +118,12 @@ script:
                 ["1/28/2017", "TREY RESEARCH", "Other", "$135"],
                 ["1/31/2017", "BEST FOR YOU ORGANICS COMPANY", "Groceries", "$97"]
             ]); 
-
-
         }
 
     function handleError(error) {
-        showNotification("Error", error);
         OfficeHelpers.Utilities.log(error);
     }
 
-    function showNotification(header, text) {
-        let container = document.getElementById('notification-popup');
-        let headerPlaceholder = container.querySelector('.notification-popup-title');
-        let textPlaceholder = container.querySelector('.ms-MessageBanner-clipper');
-
-        headerPlaceholder.textContent = header;
-        textPlaceholder.textContent = text;
-
-        let closeButton = container.querySelector('.ms-MessageBanner-close');
-        closeButton.addEventListener("click", function () {
-            if (container.className.indexOf("hide") === -1) {
-                container.className = "ms-MessageBanner is-hidden";
-            }
-            closeButton.removeEventListener("click", null);
-        });
-
-        container.className = "ms-MessageBanner is-expanded";
-    }
   language: typescript
 style:
   content: ".ms-Button {\r\n    padding: 10px;\r\n    margin:10px;\r\n}\r\n"
