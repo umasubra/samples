@@ -1,0 +1,165 @@
+id: ''
+gist: ''
+source: EXCEL
+author: Microsoft
+name: Access different components of a table
+description: 'Access rows, columns, data body range, and header range of a table'
+script:
+  content: |-
+    $('#create-table').click(createTable);
+    $('#get-data').click(getData);
+
+    /** Create a new table with some sample data */
+    function createTable() {
+        Excel.run(async (context) => {
+            let sheet: Excel.Worksheet;
+            try {
+                // If sheet already exists, queue a command to delete it
+               context.workbook.worksheets.getItem("Playground").delete();
+
+                // Then create a proxy object for a new worksheet
+                sheet = context.workbook.worksheets.add("Playground");
+
+                // Call the helper to create the table
+                await queueCreateTable(sheet);
+
+                //Queue a command to activate the sheet
+                sheet.activate();
+
+                // Run all of the queued up commands
+                await context.sync();
+            }
+            catch (error) {
+                // Re-throw the original error, for appropriate error-handling
+                // (in this snippet, simply showing a notification)
+                throw error;
+            }
+        })
+        .catch(handleError);
+    }
+
+
+    /** Highlight different sections in the table*/
+    function getData() {
+        Excel.run(async (context) => {
+            let sheet: Excel.Worksheet;
+            try {
+                // Queue a command to get the sheet
+                sheet = context.workbook.worksheets.getItem("Playground");
+
+                // Call the helper to sort the table
+                await queueGetData(sheet);
+
+                // Run all of the queued up commands
+                await context.sync();
+            }
+            catch (error) {
+                // Try to activate the new sheet regardless, to show
+                // how far the processing got before failing
+                sheet.activate();
+                await context.sync();
+
+                // Then re-throw the original error, for appropriate error-handling
+                // (in this snippet, simply showing a notification)
+                throw error;
+            }
+        })
+        .catch(handleError);
+    }
+
+
+      // Helper functions:
+
+        // Creates the table
+        async function queueCreateTable(sheet: Excel.Worksheet) {
+
+            // Queue a command to add a table to the sheet
+            let expensesTable = sheet.tables.add('A1:D1', true);
+            expensesTable.name = "ExpensesTable";
+
+            // Queue a command to set the header row
+            expensesTable.getHeaderRowRange().values = [["DATE", "MERCHANT", "CATEGORY", "AMOUNT"]];
+
+            // Queue a command to add rows to the table
+            expensesTable.rows.add(null, [
+                ["1/1/2017", "THE PHONE COMPANY", "Communications", "$120"],
+                ["1/2/2017", "NORTHWIND ELECTRIC CARS", "Transportation", "$142"],
+                ["1/5/2017", "BEST FOR YOU ORGANICS COMPANY", "Groceries", "$27"],
+                ["1/10/2017", "COHO VINEYARD", "Restaurant", "$33"],
+                ["1/11/2017", "BELLOWS COLLEGE", "Education", "$350"],
+                ["1/15/2017", "TREY RESEARCH", "Other", "$135"],
+                ["1/15/2017", "BEST FOR YOU ORGANICS COMPANY", "Groceries", "$97"]
+            ]);  
+
+            // Queue a command to set the number format of the Amount column
+             //expensesTable.columns.getItem("AMOUNT").numberFormat = "$#";
+
+            //Autofit columns and rows
+            sheet.getUsedRange().getEntireColumn().format.autofitColumns();
+            sheet.getUsedRange().getEntireRow().format.autofitRows();
+        }
+
+         // Creates the table
+        async function queueGetData(sheet: Excel.Worksheet) {
+
+            // Queue a command to add a table to the sheet
+            let expensesTable = sheet.tables.getItem("ExpensesTable");
+
+            // Queue a command to get the header range and format it 
+            expensesTable.getHeaderRowRange().format.fill.color = "#00AA00";
+
+            // Queue a command to get the data range and format it 
+            expensesTable.getDataBodyRange().format.fill.color = "#FFFF00";
+
+            // Queue a command to get the second row and format it 
+            expensesTable.rows.getItemAt(1).getRange().format.fill.color = "#FF5733";
+
+            // Queue a command to get the first column and format it
+            expensesTable.columns.getItemAt(0).getRange().format.fill.color = "#0000FF";
+
+            //Autofit columns and rows
+            sheet.getUsedRange().getEntireColumn().format.autofitColumns();
+            sheet.getUsedRange().getEntireRow().format.autofitRows();
+        }
+
+    function handleError(error) {
+        OfficeHelpers.Utilities.log(error);
+    }
+  language: typescript
+style:
+  content: ".ms-Button {\r\n    padding: 10px;\r\n    margin:10px;\r\n}\r\n"
+  language: css
+template:
+  content: |
+    <div id="content-header" class="ms-font-m">
+        <h1>Welcome</h1>
+    </div>
+
+    <div id="content-main" class="ms-font-m">
+        <p>This sample shows how to access and highlight different components of a table using the Excel JavaScript API.</p>
+        <h3>Try it out</h3>
+            <button id="create-table" class="ms-Button">
+            <span class="ms-Button-label">Step 1: Create table</span>
+        </button>
+        <button id="get-data" class="ms-Button">
+            <span class="ms-Button-label">Step 2: Get data</span>
+        </button>
+    </div>
+  language: html
+libraries: |-
+  // Office.js
+  https://appsforoffice.microsoft.com/lib/1/hosted/Office.js
+
+  // NPM libraries
+  jquery
+  office-ui-fabric-js/dist/js/fabric.min.js
+  office-ui-fabric-js/dist/css/fabric.min.css
+  office-ui-fabric-js/dist/css/fabric.components.min.css
+  @microsoft/office-js-helpers/dist/office.helpers.min.js
+  core-js/client/core.min.js
+
+  // IntelliSense: Use dt~library_name for DefinitelyTyped or URLs to d.ts files
+  dt~office-js
+  dt~jquery
+  dt~core-js
+  @microsoft/office-js-helpers/dist/office.helpers.d.ts
