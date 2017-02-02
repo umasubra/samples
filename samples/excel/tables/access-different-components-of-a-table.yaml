@@ -141,8 +141,8 @@ template:
             <button id="create-table" class="ms-Button">
             <span class="ms-Button-label">Step 1: Create table</span>
         </button>
-        <button id="get-data" class="ms-Button">
-            <span class="ms-Button-label">Step 2: Get data</span>
+        <button id="access-components" class="ms-Button">
+            <span class="ms-Button-label">Step 2: Access components and highlight</span>
         </button>
     </div>
   language: html
