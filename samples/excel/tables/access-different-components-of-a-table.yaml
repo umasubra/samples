@@ -7,7 +7,7 @@ description: 'Access rows, columns, data body range, and header range of a table
 script:
   content: |-
     $('#create-table').click(createTable);
-    $('#get-data').click(getData);
+    $('#access-components').click(accessComponents);
 
     /** Create a new table with some sample data */
     function createTable() {
@@ -39,8 +39,8 @@ script:
     }
 
 
-    /** Highlight different sections in the table*/
-    function getData() {
+    /** Access and highlight different compomnents in the table*/
+    function accessComponents() {
         Excel.run(async (context) => {
             let sheet: Excel.Worksheet;
             try {
@@ -48,7 +48,7 @@ script:
                 sheet = context.workbook.worksheets.getItem("Playground");
 
                 // Call the helper to sort the table
-                await queueGetData(sheet);
+                await queueAccessComponents(sheet);
 
                 // Run all of the queued up commands
                 await context.sync();
@@ -99,8 +99,8 @@ script:
             sheet.getUsedRange().getEntireRow().format.autofitRows();
         }
 
-         // Creates the table
-        async function queueGetData(sheet: Excel.Worksheet) {
+         // Access components and highlight them
+        async function queueAccessComponents(sheet: Excel.Worksheet) {
 
             // Queue a command to add a table to the sheet
             let expensesTable = sheet.tables.getItem("ExpensesTable");
