@@ -3,9 +3,9 @@ gist: ''
 source: EXCEL
 author: Microsoft
 name: Get data from a table
-description: 'Get rows, columns, data body range, and header range from a table'
+description: Get data from a table
 script:
-  content: |-
+  content: |
     $('#create-table').click(createTable);
     $('#get-data').click(getData);
 
@@ -15,7 +15,7 @@ script:
             let sheet: Excel.Worksheet;
             try {
                 // If sheet already exists, queue a command to delete it
-               // context.workbook.worksheets.getItem("Playground").delete();
+               context.workbook.worksheets.getItem("Playground").delete();
 
                 // Then create a proxy object for a new worksheet
                 sheet = context.workbook.worksheets.add("Playground");
@@ -39,7 +39,7 @@ script:
     }
 
 
-    /** Highlight different sections in the table*/
+    /** Get data from the table*/
     function getData() {
         Excel.run(async (context) => {
             let sheet: Excel.Worksheet;
@@ -99,23 +99,42 @@ script:
             sheet.getUsedRange().getEntireRow().format.autofitRows();
         }
 
-         // Creates the table
+         // Access components and highlight them
         async function queueGetData(sheet: Excel.Worksheet) {
 
             // Queue a command to add a table to the sheet
             let expensesTable = sheet.tables.getItem("ExpensesTable");
 
-            // Queue a command to get the header range and format it 
-            expensesTable.getHeaderRowRange().format.fill.color = "#00AA00";
+            // Queue a command to get the values in the header range 
+            let headerRange = expensesTable.getHeaderRowRange().load("values");
 
-            // Queue a command to get the data range and format it 
-            expensesTable.getDataBodyRange().format.fill.color = "#FFFF00";
+           // Queue a command to get the values in the table body 
+            let bodyRange = expensesTable.getDataBodyRange().load("values");
 
-            // Queue a command to get the second row and format it 
-            expensesTable.rows.getItemAt(1).getRange().format.fill.color = "#FF5733";
+           // Queue a command to get the values in the MERCHANT column
+            let columnRange = expensesTable.columns.getItem("MERCHANT").getDataBodyRange().load("values");
 
-            // Queue a command to get the first column and format it
-            expensesTable.columns.getItemAt(0).getRange().format.fill.color = "#0000FF";
+            // Queue a command to get the values in the second row
+           let rowRange= expensesTable.rows.getItemAt(1).load("values");
+
+            await sheet.context.sync();
+
+            const headerValues = headerRange.values;
+            const bodyValues = bodyRange.values;
+            const merchantColumnValues = columnRange.values;
+            const secondRowValues = rowRange.values;
+
+            //Write headings to a different range
+            sheet.getRange("A20:D20").values = headerValues;
+
+            //Write table body to a different range
+            sheet.getRange("A21:D27").values = bodyValues;
+
+            //Write merchant column body to a different range
+            sheet.getRange("B30:B36").values = merchantColumnValues;
+
+            //Write second row va;ues to a different range
+            sheet.getRange("A17:D17").values = secondRowValues;
 
             //Autofit columns and rows
             sheet.getUsedRange().getEntireColumn().format.autofitColumns();
@@ -136,7 +155,7 @@ template:
     </div>
 
     <div id="content-main" class="ms-font-m">
-        <p>This sample shows how to get data from the different sections in a table using the Excel JavaScript API.</p>
+        <p>This sample shows how to get data from a table and write to a range in the worksheet using the Excel JavaScript API.</p>
         <h3>Try it out</h3>
             <button id="create-table" class="ms-Button">
             <span class="ms-Button-label">Step 1: Create table</span>
@@ -144,7 +163,6 @@ template:
         <button id="get-data" class="ms-Button">
             <span class="ms-Button-label">Step 2: Get data</span>
         </button>
-
     </div>
   language: html
 libraries: |-
