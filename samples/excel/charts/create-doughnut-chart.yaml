@@ -1,0 +1,46 @@
+id: ''
+gist: ''
+source: EXCEL
+author: Microsoft
+name: Create a doughnut chart
+description: Create a doughnut chart
+script:
+  content: "$('#create-table').click(createTable);\n$('#create-chart').click(createChart);\n\n/** Create a new table with some sample data */\nfunction createTable() {\n    Excel.run(async (context) => {\n        let sheet: Excel.Worksheet;\n        try {\n            // If sheet already exists, queue a command to delete it\n            context.workbook.worksheets.getItem(\"Playground\").delete();\n\n            // Then create a proxy object for a new worksheet\n            sheet = context.workbook.worksheets.add(\"Playground\");\n\n            // Call the helper to create the table\n            await queueCreateTable(sheet);\n\n            //Queue a command to activate the sheet\n            sheet.activate();\n\n            // Run all of the queued up commands\n            await context.sync();\n        }\n        catch (error) {\n            // Re-throw the original error, for appropriate error-handling\n            // (in this snippet, simply showing a notification)\n            throw error;\n        }\n    })\n    .catch(handleError);\n}\n\n\n/** Create Chart **/\nfunction createChart() {\n    Excel.run(async (context) => {\n        let sheet: Excel.Worksheet;\n        try {\n            // Queue a command to get the sheet\n            sheet = context.workbook.worksheets.getItem(\"Playground\");\n\n            // Call the helper to sort the table\n            await queueCreateChart(sheet);\n\n            // Run all of the queued up commands\n            await context.sync();\n        }\n        catch (error) {\n            // Try to activate the new sheet regardless, to show\n            // how far the processing got before failing\n            sheet.activate();\n            await context.sync();\n\n            // Then re-throw the original error, for appropriate error-handling\n            // (in this snippet, simply showing a notification)\n            throw error;\n        }\n    })\n    .catch(handleError);\n}\n\n\n  // Helper functions:\n\n    // Creates the table\n    async function queueCreateTable(sheet: Excel.Worksheet) {\n\n        // Queue a command to add a table to the sheet\n        let expensesTable = sheet.tables.add('A1:B1', true);\n        expensesTable.name = \"ExpensesByCategoryTable\";\n\n        // Queue a command to set the header row\n        expensesTable.getHeaderRowRange().values = [[\"Category\", \"Expense\"]];\n\n        // Queue a command to add rows to the table\n        expensesTable.rows.add(null, [\n\t\t\t\t\t\t  [\"Groceries\", 5000],\n\t\t\t\t\t\t  [\"Entertaiment\", 400],\n\t\t\t\t\t\t  [\"Education\", 12000],\n\t\t\t\t\t\t  [\"Charity\", 1550],\n\t\t\t\t\t\t  [\"Transportation\", 225],\n\t\t\t\t\t\t  [\"Other\", 6005]\n        ]);  \n\n        // Queue a command to set the number format of the Amount column\n         //expensesTable.columns.getItem(\"AMOUNT\").numberFormat = \"$#\";\n\n        //Autofit columns and rows\n        sheet.getUsedRange().getEntireColumn().format.autofitColumns();\n        sheet.getUsedRange().getEntireRow().format.autofitRows();\n    }\n\n     // Creates the table\n    async function queueCreateChart(sheet: Excel.Worksheet) {\n\n        // Queue a command to add a table to the sheet\n        let expensesByCategoryTable = sheet.tables.getItem(\"ExpensesByCategoryTable\");\n        const dataRange = expensesByCategoryTable.getDataBodyRange();\n\n        //Queue a command to create the chart\n\n\t\t\tvar categoryChart = sheet.charts.add(\"3dpie\", dataRange, \"auto\");\n\n\t\t\t//Queue commands to set the properties and format the chart\n                    categoryChart.setPosition(\"A15\", \"F25\");\n                    categoryChart.title.text = \"Expenses By Category\";\n                    categoryChart.title.format.font.size = 10;\n                    categoryChart.title.format.font.name = \"Corbel\";\n                    categoryChart.title.format.font.color = \"#41AEBD\";\n                    categoryChart.legend.format.font.name = \"Corbel\";\n                    categoryChart.legend.format.font.size = 8;\n                    categoryChart.legend.position = \"right\";\n                    categoryChart.dataLabels.showPercentage = true;\n                    categoryChart.dataLabels.format.font.size = 8;\n                    categoryChart.dataLabels.format.font.color = \"white\";\n                    var points = categoryChart.series.getItemAt(0).points;\n                    points.getItemAt(0).format.fill.setSolidColor(\"#0C8DB9\");\n                    points.getItemAt(1).format.fill.setSolidColor(\"#B1D9F7\");\n                    points.getItemAt(2).format.fill.setSolidColor(\"#4C66C5\");\n                    points.getItemAt(3).format.fill.setSolidColor(\"#5CC9EF\");\n                    points.getItemAt(4).format.fill.setSolidColor(\"#5CCBAD\");\n                    points.getItemAt(5).format.fill.setSolidColor(\"#A5E750\");\n                  \n\n        //Autofit columns and rows\n        sheet.getUsedRange().getEntireColumn().format.autofitColumns();\n        sheet.getUsedRange().getEntireRow().format.autofitRows();\n    }\n\nfunction handleError(error) {\n    OfficeHelpers.Utilities.log(error);\n}"
+  language: typescript
+style:
+  content: ".ms-Button {\r\n    padding: 10px;\r\n    margin: 10px;\r\n}\r\n\r\n\r\n"
+  language: css
+template:
+  content: |
+    <div id="content-header" class="ms-font-m">
+        <h1>Welcome</h1>
+    </div>
+
+    <div id="content-main" class="ms-font-m">
+        <p>This sample shows how to create a doughnut chart using the Excel JavaScript API.</p>
+        <h3>Try it out</h3>
+            <button id="create-table" class="ms-Button">
+            <span class="ms-Button-label">Step 1: Create table</span>
+        </button>
+        <button id="create-chart" class="ms-Button">
+            <span class="ms-Button-label">Step 2: Create chart</span>
+        </button>
+    </div>
+  language: html
+libraries: |-
+  // Office.js
+  https://appsforoffice.microsoft.com/lib/1/hosted/Office.js
+
+  // NPM libraries
+  jquery
+  office-ui-fabric-js/dist/js/fabric.min.js
+  office-ui-fabric-js/dist/css/fabric.min.css
+  office-ui-fabric-js/dist/css/fabric.components.min.css
+  @microsoft/office-js-helpers/dist/office.helpers.min.js
+  core-js/client/core.min.js
+
+  // IntelliSense: Use dt~library_name for DefinitelyTyped or URLs to d.ts files
+  dt~office-js
+  dt~jquery
+  dt~core-js
+  @microsoft/office-js-helpers/dist/office.helpers.d.ts
