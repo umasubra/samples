@@ -2,8 +2,8 @@ id: ''
 gist: ''
 source: EXCEL
 author: Microsoft
-name: Apply a custom filter
-description: Apply a custom filter to a table
+name: Apply a values filter
+description: Apply a values filter to a table
 script:
   content: |
     $('#create-table').click(createTable);
@@ -14,11 +14,8 @@ script:
         Excel.run(async (context) => {
             let sheet: Excel.Worksheet;
             try {
-                // If sheet already exists, queue a command to delete it
-                //context.workbook.worksheets.getItem("Playground").delete();
-
-                // Then create a proxy object for a new worksheet
-                sheet = context.workbook.worksheets.add("Playground");
+                // Queue a command to add a new worksheet
+                sheet = context.workbook.worksheets.add();
 
                 // Call the helper to create the table
                 await queueCreateTable(sheet);
@@ -30,12 +27,9 @@ script:
                 await context.sync();
             }
             catch (error) {
-                // Re-throw the original error, for appropriate error-handling
-                // (in this snippet, simply showing a notification)
-                throw error;
+                OfficeHelpers.Utilities.log(error);
             }
         })
-        .catch(handleError);
     }
 
 
@@ -45,31 +39,22 @@ script:
             let sheet: Excel.Worksheet;
             try {
                 // Queue a command to get the sheet
-                sheet = context.workbook.worksheets.getItem("Playground");
+                sheet = context.workbook.worksheets.getActiveWorksheet();
 
-                // Call the helper to sort the table
+                // Call the helper to filter the table
                 await queueFilterData(sheet);
 
                 // Run all of the queued up commands
                 await context.sync();
             }
             catch (error) {
-                // Try to activate the new sheet regardless, to show
-                // how far the processing got before failing
-                sheet.activate();
-                await context.sync();
-
-                // Then re-throw the original error, for appropriate error-handling
-                // (in this snippet, simply showing a notification)
-                throw error;
+                OfficeHelpers.Utilities.log(error);
             }
         })
-        .catch(handleError);
     }
-      // Helper functions:
 
-        // Creates the table
-        async function queueCreateTable(sheet: Excel.Worksheet) {
+    // Create the table
+    async function queueCreateTable(sheet: Excel.Worksheet) {
 
             // Queue a command to add a table to the sheet
             let expensesTable = sheet.tables.add('A1:D1', true);
@@ -95,30 +80,25 @@ script:
             //Autofit columns and rows
             sheet.getUsedRange().getEntireColumn().format.autofitColumns();
             sheet.getUsedRange().getEntireRow().format.autofitRows();
-        }
+    }
 
-        // Sort the table data
-        async function queueFilterData(sheet: Excel.Worksheet) {
+    // Sort the table data
+    async function queueFilterData(sheet: Excel.Worksheet) {
 
             // Queue a command to get the table
             const expensesTable = sheet.tables.getItem("ExpensesTable");
 
-            // Queue a command to filter and show only below average transactions 
+            // Queue a command to filter and show only certain categories
                 const filter = expensesTable.columns.getItem("CATEGORY").filter;
                 filter.apply({
                     filterOn: Excel.FilterOn.values,
                     values: ["Restaurant", "Groceries"]
                 });
 
-
-        }
-
-    function handleError(error) {
-        OfficeHelpers.Utilities.log(error);
     }
   language: typescript
 style:
-  content: ".ms-Button {\r\n    padding: 10px;\r\n    margin:10px;\r\n}"
+  content: ''
   language: css
 template:
   content: |
@@ -127,13 +107,14 @@ template:
     </div>
 
     <div id="content-main" class="ms-font-m">
-        <p>This sample shows how to apply a custom filter the data in a table using the Excel JavaScript API.</p>
-        <h3>Try it out</h3>
-            <button id="create-table" class="ms-Button">
-            <span class="ms-Button-label">Step 1: Create table</span>
+        <p>This sample shows how to apply a values filter the data in a table using the Excel JavaScript API.</p>
+        <h3>Set up</h3>
+        <button id="create-table" class="ms-Button">
+            <span class="ms-Button-label">Create table</span>
         </button>
+        <h3>Try it out</h3>
         <button id="filter-data" class="ms-Button">
-            <span class="ms-Button-label">Step 2: Filter data</span>
+            <span class="ms-Button-label">Filter data</span>
         </button>
     </div>
   language: html
