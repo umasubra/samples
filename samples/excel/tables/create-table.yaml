@@ -3,7 +3,7 @@ gist: ''
 source: EXCEL
 author: Microsoft
 name: Create a table
-description: Creates a table with three columns and four rows.
+description: Creates a table with four columns and seven rows.
 script:
   content: |+
     $('#create-table').click(createTable);
