@@ -8,38 +8,31 @@ script:
   content: |+
     $('#import-json-data').click(importJsonData);
 
-    /** Create a new table with some sample data */
+    /** Import json data into a table */
     function importJsonData() {
-        Excel.run(async (context) => {
-            let sheet: Excel.Worksheet;
-            try {
-                // If sheet already exists, queue a command to delete it
-                context.workbook.worksheets.getItem("Playground").delete();
+      Excel.run(async (context) => {
+        let sheet: Excel.Worksheet;
+        try {
+          // Queue a command to add a new worksheet
+          sheet = context.workbook.worksheets.add();
 
-                // Then create a proxy object for a new worksheet
-                sheet = context.workbook.worksheets.add("Playground");
+          // Call the helper to import data into the table
+          await queueImportJsonData(sheet);
 
-                // Call the helper to create the table
-                await queueImportJsonData(sheet);
+          //Queue a command to activate the sheet
+          sheet.activate();
 
-                //Queue a command to activate the sheet
-                sheet.activate();
+          // Run all of the queued up commands
+          await context.sync();
+        }
+        catch (error) {
+          OfficeHelpers.Utilities.log(error);
+        }
+      })
+    }
 
-                // Run all of the queued up commands
-                await context.sync();
-            }
-            catch (error) {
-                //  Re-throw the original error, for appropriate error-handling
-                // (in this snippet, simply showing a notification)
-                throw error;
-            }
-        })
-        .catch(handleError);
-
-        // Helper functions:
-
-        // Creates the table
-        async function queueImportJsonData(sheet: Excel.Worksheet) {
+    // Import data into the table
+    async function queueImportJsonData(sheet: Excel.Worksheet) {
 
             // Queue a command to add a table to the sheet
             let expensesTable = sheet.tables.add('A1:D1', true);
@@ -56,11 +49,6 @@ script:
             //Autofit columns and rows
             sheet.getUsedRange().getEntireColumn().format.autofitColumns();
             sheet.getUsedRange().getEntireRow().format.autofitRows();
-        }
-    }
-
-    function handleError(error) {
-        OfficeHelpers.Utilities.log(error);
     }
 
     const transactions = [    
@@ -145,7 +133,7 @@ template:
     </div>
 
     <div id="content-main" class="ms-font-m">
-        <p>This sample shows how to load some sample data into the worksheet, and then create a chart using the Excel JavaScript API.</p>
+        <p>This sample shows how to import json data into a table using the Excel JavaScript API.</p>
         <h3>Try it out</h3>
         <button id="import-json-data" class="ms-Button">
             <span class="ms-Button-label">Import json data</span>
