@@ -1,4 +1,4 @@
-id: ''
+id: ciytrr1m100054r6zm8ion2vf
 gist: ''
 source: EXCEL
 author: Microsoft
@@ -14,11 +14,8 @@ script:
         Excel.run(async (context) => {
             let sheet: Excel.Worksheet;
             try {
-                // If sheet already exists, queue a command to delete it
-               context.workbook.worksheets.getItem("Playground").delete();
-
-                // Then create a proxy object for a new worksheet
-                sheet = context.workbook.worksheets.add("Playground");
+                // Queue a command to add a new worksheet
+                sheet = context.workbook.worksheets.add();
 
                 // Call the helper to create the table
                 await queueCreateTable(sheet);
@@ -30,51 +27,34 @@ script:
                 await context.sync();
             }
             catch (error) {
-                // Try to activate the new sheet regardless, to show
-                // how far the processing got before failing
-                sheet.activate();
-                await context.sync();
-
-                // Then re-throw the original error, for appropriate error-handling
-                // (in this snippet, simply showing a notification)
-                throw error;
+                OfficeHelpers.Utilities.log(error);
             }
         })
-        .catch(handleError);
     }
 
 
-    /** Add rows to an existing table */
+    /** Add a caculated column to an existing table */
     function addColumn() {
         Excel.run(async (context) => {
             let sheet: Excel.Worksheet;
             try {
                 // Queue a command to get the sheet
-                sheet = context.workbook.worksheets.getItem("Playground");
+                sheet = context.workbook.worksheets.getActiveWorksheet();
 
-                // Call the helper to sort the table
+                // Call the helper to add the column
                 await queueAddColumn(sheet);
 
                 // Run all of the queued up commands
                 await context.sync();
             }
             catch (error) {
-                // Try to activate the new sheet regardless, to show
-                // how far the processing got before failing
-                sheet.activate();
-                await context.sync();
-
-                // Then re-throw the original error, for appropriate error-handling
-                // (in this snippet, simply showing a notification)
-                throw error;
+                OfficeHelpers.Utilities.log(error);
             }
         })
-        .catch(handleError);
     }
-      // Helper functions:
 
-        // Creates the table
-        async function queueCreateTable(sheet: Excel.Worksheet) {
+    // Creates the table
+    async function queueCreateTable(sheet: Excel.Worksheet) {
 
             // Queue a command to add a table to the sheet
             let expensesTable = sheet.tables.add('A1:D1', true);
@@ -102,8 +82,8 @@ script:
             sheet.getUsedRange().getEntireRow().format.autofitRows();
         }
 
-        // Sort the table data
-        async function queueAddColumn(sheet: Excel.Worksheet) {
+    // Add the calculated column
+    async function queueAddColumn(sheet: Excel.Worksheet) {
 
             // Queue a command to get the table
             const expensesTable = sheet.tables.getItem("ExpensesTable");
@@ -120,13 +100,11 @@ script:
                 ['=IF(OR((TEXT([DATE], "dddd") = "Saturday"), (TEXT([DATE], "dddd") = "Sunday")), "Weekend", "Weekday")']
             ]);
 
-                    //Autofit columns and rows
+            //Autofit columns and rows
             sheet.getUsedRange().getEntireColumn().format.autofitColumns();
             sheet.getUsedRange().getEntireRow().format.autofitRows();
-        }
-    function handleError(error) {
-        OfficeHelpers.Utilities.log(error);
     }
+
 
 
 
@@ -135,7 +113,7 @@ script:
 
   language: typescript
 style:
-  content: ".ms-Button {\r\n    padding: 10px;\r\n    margin:10px;\r\n}\r\n"
+  content: ''
   language: css
 template:
   content: |
@@ -144,13 +122,14 @@ template:
     </div>
 
     <div id="content-main" class="ms-font-m">
-        <p>This sample shows how to add a column to an existing table using the Excel JavaScript API.</p>
-        <h3>Try it out</h3>
-            <button id="create-table" class="ms-Button">
-            <span class="ms-Button-label">Step 1: Create table</span>
+        <p>This sample shows how to add a calculated column to a table using the Excel JavaScript API.</p>
+        <h3>Set up</h3>
+        <button id="create-table" class="ms-Button">
+            <span class="ms-Button-label">Create table</span>
         </button>
+        <h3>Try it out</h3>
         <button id="add-calculated-column" class="ms-Button">
-            <span class="ms-Button-label">Step 2: Add a new calculated column</span>
+            <span class="ms-Button-label">Add a new calculated column</span>
         </button>
     </div>
   language: html
