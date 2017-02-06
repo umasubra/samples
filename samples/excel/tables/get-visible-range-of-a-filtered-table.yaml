@@ -5,7 +5,7 @@ author: Microsoft
 name: Get visible range from a filtered table
 description: Get visible range from a filtered table
 script:
-  content: |
+  content: |+
     $('#create-table').click(createTable);
     $('#get-visible-range').click(getVisibleRange);
 
@@ -14,11 +14,8 @@ script:
         Excel.run(async (context) => {
             let sheet: Excel.Worksheet;
             try {
-                // If sheet already exists, queue a command to delete it
-                context.workbook.worksheets.getItem("Playground").delete();
-
-                // Then create a proxy object for a new worksheet
-                sheet = context.workbook.worksheets.add("Playground");
+                // Queue a command to add a new worksheet
+                sheet = context.workbook.worksheets.add();
 
                 // Call the helper to create the table
                 await queueCreateTable(sheet);
@@ -30,51 +27,34 @@ script:
                 await context.sync();
             }
             catch (error) {
-                // Try to activate the new sheet regardless, to show
-                // how far the processing got before failing
-                sheet.activate();
-                await context.sync();
-
-                // Then re-throw the original error, for appropriate error-handling
-                // (in this snippet, simply showing a notification)
-                throw error;
+                OfficeHelpers.Utilities.log(error);
             }
         })
-        .catch(handleError);
     }
 
 
-    /** Filter the data in the table and get visible range*/
+    /** Get visible range from a filtered table*/
     function getVisibleRange() {
         Excel.run(async (context) => {
             let sheet: Excel.Worksheet;
             try {
                 // Queue a command to get the sheet
-                sheet = context.workbook.worksheets.getItem("Playground");
+                sheet = context.workbook.worksheets.getActiveWorksheet();
 
-                // Call the helper to sort the table
+                // Call the helper to get visible range
                 await queueGetVisibleRange(sheet);
 
                 // Run all of the queued up commands
                 await context.sync();
             }
             catch (error) {
-                // Try to activate the new sheet regardless, to show
-                // how far the processing got before failing
-                sheet.activate();
-                await context.sync();
 
-                // Then re-throw the original error, for appropriate error-handling
-                // (in this snippet, simply showing a notification)
-                throw error;
             }
         })
-        .catch(handleError);
     }
-      // Helper functions:
 
-        // Creates the table
-        async function queueCreateTable(sheet: Excel.Worksheet) {
+    // Create the table
+    async function queueCreateTable(sheet: Excel.Worksheet) {
 
             // Queue a command to add a table to the sheet
             let expensesTable = sheet.tables.add('A1:D1', true);
@@ -102,18 +82,20 @@ script:
             sheet.getUsedRange().getEntireRow().format.autofitRows();
         }
 
-        // Sort the table data
-        async function queueGetVisibleRange(sheet: Excel.Worksheet) {
+    // Filter and get visible range of a filtered table
+    async function queueGetVisibleRange(sheet: Excel.Worksheet) {
 
             // Queue a command to get the table
-            const expensesTable = sheet.tables.getItem("ExpensesTable");
+             const expensesTable = sheet.tables.getItem("ExpensesTable");
 
             // Queue a command to filter and show only below average transactions 
-                var filter = expensesTable.columns.getItem("AMOUNT").filter;
+               var filter = expensesTable.columns.getItem("AMOUNT").filter;
+
                 filter.apply({
                     filterOn: Excel.FilterOn.dynamic,
                     dynamicCriteria: Excel.DynamicFilterCriteria.belowAverage
                 });
+
 
                 var visibleRange = expensesTable.getDataBodyRange().getVisibleView().load("values");
 
@@ -123,14 +105,11 @@ script:
 
                 //Write the values to a different range
                 sheet.getRange("A21:D24").values = visibleValues;
-        }
-
-    function handleError(error) {
-        OfficeHelpers.Utilities.log(error);
     }
+
   language: typescript
 style:
-  content: ".ms-Button {\r\n    padding: 10px;\r\n    margin:10px;\r\n}\r\n"
+  content: ''
   language: css
 template:
   content: |
@@ -139,13 +118,14 @@ template:
     </div>
 
     <div id="content-main" class="ms-font-m">
-        <p>This sample shows how to filter the data and get the visible range from the filtered table using the Excel JavaScript API.</p>
-        <h3>Try it out</h3>
-            <button id="create-table" class="ms-Button">
-            <span class="ms-Button-label">Step 1: Create table</span>
+        <p>This sample shows how to get the visible range from a filtered table using the Excel JavaScript API.</p>
+        <h3>Set up</h3>
+        <button id="create-table" class="ms-Button">
+            <span class="ms-Button-label">Create table</span>
         </button>
+        <h3>Try it out</h3>
         <button id="get-visible-range" class="ms-Button">
-            <span class="ms-Button-label">Step 2: Filter and get visible view</span>
+            <span class="ms-Button-label">Get visible range</span>
         </button>
     </div>
   language: html
