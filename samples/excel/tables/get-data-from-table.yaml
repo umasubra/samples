@@ -14,11 +14,8 @@ script:
         Excel.run(async (context) => {
             let sheet: Excel.Worksheet;
             try {
-                // If sheet already exists, queue a command to delete it
-               context.workbook.worksheets.getItem("Playground").delete();
-
-                // Then create a proxy object for a new worksheet
-                sheet = context.workbook.worksheets.add("Playground");
+                // Queue a command to add a new worksheet
+                sheet = context.workbook.worksheets.add();
 
                 // Call the helper to create the table
                 await queueCreateTable(sheet);
@@ -30,14 +27,10 @@ script:
                 await context.sync();
             }
             catch (error) {
-                // Re-throw the original error, for appropriate error-handling
-                // (in this snippet, simply showing a notification)
-                throw error;
+
             }
         })
-        .catch(handleError);
     }
-
 
     /** Get data from the table*/
     function getData() {
@@ -45,33 +38,22 @@ script:
             let sheet: Excel.Worksheet;
             try {
                 // Queue a command to get the sheet
-                sheet = context.workbook.worksheets.getItem("Playground");
+                sheet = context.workbook.worksheets.getActiveWorksheet();
 
-                // Call the helper to sort the table
+                // Call the helper to get the data from the table
                 await queueGetData(sheet);
 
                 // Run all of the queued up commands
                 await context.sync();
             }
             catch (error) {
-                // Try to activate the new sheet regardless, to show
-                // how far the processing got before failing
-                sheet.activate();
-                await context.sync();
 
-                // Then re-throw the original error, for appropriate error-handling
-                // (in this snippet, simply showing a notification)
-                throw error;
             }
         })
-        .catch(handleError);
     }
 
-
-      // Helper functions:
-
-        // Creates the table
-        async function queueCreateTable(sheet: Excel.Worksheet) {
+     // Creates the table
+     async function queueCreateTable(sheet: Excel.Worksheet) {
 
             // Queue a command to add a table to the sheet
             let expensesTable = sheet.tables.add('A1:D1', true);
@@ -99,8 +81,8 @@ script:
             sheet.getUsedRange().getEntireRow().format.autofitRows();
         }
 
-         // Access components and highlight them
-        async function queueGetData(sheet: Excel.Worksheet) {
+    // Get the data from the table and write to a range
+    async function queueGetData(sheet: Excel.Worksheet) {
 
             // Queue a command to add a table to the sheet
             let expensesTable = sheet.tables.getItem("ExpensesTable");
@@ -139,14 +121,10 @@ script:
             //Autofit columns and rows
             sheet.getUsedRange().getEntireColumn().format.autofitColumns();
             sheet.getUsedRange().getEntireRow().format.autofitRows();
-        }
-
-    function handleError(error) {
-        OfficeHelpers.Utilities.log(error);
     }
   language: typescript
 style:
-  content: ".ms-Button {\r\n    padding: 10px;\r\n    margin:10px;\r\n}\r\n"
+  content: ''
   language: css
 template:
   content: |
@@ -156,12 +134,13 @@ template:
 
     <div id="content-main" class="ms-font-m">
         <p>This sample shows how to get data from a table and write to a range in the worksheet using the Excel JavaScript API.</p>
-        <h3>Try it out</h3>
-            <button id="create-table" class="ms-Button">
-            <span class="ms-Button-label">Step 1: Create table</span>
+        <h3>Set up</h3>
+        <button id="create-table" class="ms-Button">
+            <span class="ms-Button-label">Create table</span>
         </button>
+        <h3>Try it out</h3>
         <button id="get-data" class="ms-Button">
-            <span class="ms-Button-label">Step 2: Get data</span>
+            <span class="ms-Button-label">Get data</span>
         </button>
     </div>
   language: html
