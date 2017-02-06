@@ -14,11 +14,8 @@ script:
         Excel.run(async (context) => {
             let sheet: Excel.Worksheet;
             try {
-                // If sheet already exists, queue a command to delete it
-                context.workbook.worksheets.getItem("Playground").delete();
-
-                // Then create a proxy object for a new worksheet
-                sheet = context.workbook.worksheets.add("Playground");
+                // Queue a command to add a new worksheet
+                sheet = context.workbook.worksheets.add();
 
                 // Call the helper to create the table
                 await queueCreateTable(sheet);
@@ -30,17 +27,9 @@ script:
                 await context.sync();
             }
             catch (error) {
-                // Try to activate the new sheet regardless, to show
-                // how far the processing got before failing
-                sheet.activate();
-                await context.sync();
-
-                // Then re-throw the original error, for appropriate error-handling
-                // (in this snippet, simply showing a notification)
-                throw error;
+                OfficeHelpers.Utilities.log(error);
             }
         })
-        .catch(handleError);
     }
 
 
@@ -50,31 +39,22 @@ script:
             let sheet: Excel.Worksheet;
             try {
                 // Queue a command to get the sheet
-                sheet = context.workbook.worksheets.getItem("Playground");
+                sheet = context.workbook.worksheets.getActiveWorksheet();
 
-                // Call the helper to sort the table
+                // Call the helper to add rows to the table
                 await queueAddRows(sheet);
 
                 // Run all of the queued up commands
                 await context.sync();
             }
             catch (error) {
-                // Try to activate the new sheet regardless, to show
-                // how far the processing got before failing
-                sheet.activate();
-                await context.sync();
-
-                // Then re-throw the original error, for appropriate error-handling
-                // (in this snippet, simply showing a notification)
-                throw error;
+                OfficeHelpers.Utilities.log(error);
             }
         })
-        .catch(handleError);
     }
-      // Helper functions:
 
-        // Creates the table
-        async function queueCreateTable(sheet: Excel.Worksheet) {
+    // Create the table
+    async function queueCreateTable(sheet: Excel.Worksheet) {
 
             // Queue a command to add a table to the sheet
             let expensesTable = sheet.tables.add('A1:D1', true);
@@ -102,13 +82,13 @@ script:
             sheet.getUsedRange().getEntireRow().format.autofitRows();
         }
 
-        // Sort the table data
-        async function queueAddRows(sheet: Excel.Worksheet) {
+    // Add new rows to the table
+    async function queueAddRows(sheet: Excel.Worksheet) {
 
             // Queue a command to get the table
             const expensesTable = sheet.tables.getItem("ExpensesTable");
 
-            // Queue a command to add additional rows to the table
+            // Queue a command to add more rows to the table
             expensesTable.rows.add(null, [
                 ["1/16/2017", "THE PHONE COMPANY", "Communications", "$120"],
                 ["1/20/2017", "NORTHWIND ELECTRIC CARS", "Transportation", "$142"],
@@ -118,15 +98,11 @@ script:
                 ["1/28/2017", "TREY RESEARCH", "Other", "$135"],
                 ["1/31/2017", "BEST FOR YOU ORGANICS COMPANY", "Groceries", "$97"]
             ]); 
-        }
-
-    function handleError(error) {
-        OfficeHelpers.Utilities.log(error);
     }
 
   language: typescript
 style:
-  content: ".ms-Button {\r\n    padding: 10px;\r\n    margin:10px;\r\n}\r\n"
+  content: ''
   language: css
 template:
   content: |
@@ -136,12 +112,13 @@ template:
 
     <div id="content-main" class="ms-font-m">
         <p>This sample shows how to add rows to an existing table using the Excel JavaScript API.</p>
-        <h3>Try it out</h3>
-            <button id="create-table" class="ms-Button">
-            <span class="ms-Button-label">Step 1: Create table</span>
+        <h3>Set up</h3>
+        <button id="create-table" class="ms-Button">
+            <span class="ms-Button-label">Create table</span>
         </button>
+        <h3>Try it out</h3>
         <button id="add-rows" class="ms-Button">
-            <span class="ms-Button-label">Step 2: Add new rows</span>
+            <span class="ms-Button-label">Add new rows</span>
         </button>
     </div>
   language: html
