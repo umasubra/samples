@@ -1,24 +1,21 @@
-id: ''
+id: ciytqtehj00004r6zzb4wzav5
 gist: ''
 source: EXCEL
 author: Microsoft
-name: Get data from a table
-description: 'Get rows, columns, data body range, and header range from a table'
+name: Format table
+description: Format a table
 script:
-  content: |-
+  content: |
     $('#create-table').click(createTable);
-    $('#get-data').click(getData);
+    $('#format-table').click(formatTable);
 
     /** Create a new table with some sample data */
     function createTable() {
         Excel.run(async (context) => {
             let sheet: Excel.Worksheet;
             try {
-                // If sheet already exists, queue a command to delete it
-               // context.workbook.worksheets.getItem("Playground").delete();
-
-                // Then create a proxy object for a new worksheet
-                sheet = context.workbook.worksheets.add("Playground");
+                // Queue a command to add a new worksheet
+                sheet = context.workbook.worksheets.add();
 
                 // Call the helper to create the table
                 await queueCreateTable(sheet);
@@ -30,48 +27,34 @@ script:
                 await context.sync();
             }
             catch (error) {
-                // Re-throw the original error, for appropriate error-handling
-                // (in this snippet, simply showing a notification)
-                throw error;
+                OfficeHelpers.Utilities.log(error);
             }
         })
-        .catch(handleError);
     }
 
 
-    /** Highlight different sections in the table*/
-    function getData() {
+    /** Format different sections in the table*/
+    function formatTable() {
         Excel.run(async (context) => {
             let sheet: Excel.Worksheet;
             try {
                 // Queue a command to get the sheet
-                sheet = context.workbook.worksheets.getItem("Playground");
+                sheet = context.workbook.worksheets.getActiveWorksheet();
 
-                // Call the helper to sort the table
-                await queueGetData(sheet);
+                // Call the helper to format the table
+                await queueFormatTable(sheet);
 
                 // Run all of the queued up commands
                 await context.sync();
             }
             catch (error) {
-                // Try to activate the new sheet regardless, to show
-                // how far the processing got before failing
-                sheet.activate();
-                await context.sync();
-
-                // Then re-throw the original error, for appropriate error-handling
-                // (in this snippet, simply showing a notification)
-                throw error;
+                OfficeHelpers.Utilities.log(error);
             }
         })
-        .catch(handleError);
     }
 
-
-      // Helper functions:
-
-        // Creates the table
-        async function queueCreateTable(sheet: Excel.Worksheet) {
+    // Creates the table
+    async function queueCreateTable(sheet: Excel.Worksheet) {
 
             // Queue a command to add a table to the sheet
             let expensesTable = sheet.tables.add('A1:D1', true);
@@ -99,8 +82,8 @@ script:
             sheet.getUsedRange().getEntireRow().format.autofitRows();
         }
 
-         // Creates the table
-        async function queueGetData(sheet: Excel.Worksheet) {
+    // Format the different sections of the table
+    async function queueFormatTable(sheet: Excel.Worksheet) {
 
             // Queue a command to add a table to the sheet
             let expensesTable = sheet.tables.getItem("ExpensesTable");
@@ -120,14 +103,10 @@ script:
             //Autofit columns and rows
             sheet.getUsedRange().getEntireColumn().format.autofitColumns();
             sheet.getUsedRange().getEntireRow().format.autofitRows();
-        }
-
-    function handleError(error) {
-        OfficeHelpers.Utilities.log(error);
     }
   language: typescript
 style:
-  content: ".ms-Button {\r\n    padding: 10px;\r\n    margin:10px;\r\n}\r\n"
+  content: ''
   language: css
 template:
   content: |
@@ -136,13 +115,14 @@ template:
     </div>
 
     <div id="content-main" class="ms-font-m">
-        <p>This sample shows how to get data from the different sections in a table using the Excel JavaScript API.</p>
-        <h3>Try it out</h3>
-            <button id="create-table" class="ms-Button">
-            <span class="ms-Button-label">Step 1: Create table</span>
+        <p>This sample shows how to format the different sections in a table using the Excel JavaScript API.</p>
+        <h3>Set up</h3>
+        <button id="create-table" class="ms-Button">
+            <span class="ms-Button-label">Create table</span>
         </button>
-        <button id="get-data" class="ms-Button">
-            <span class="ms-Button-label">Step 2: Get data</span>
+        <h3>Try it out</h3>
+        <button id="format-table" class="ms-Button">
+            <span class="ms-Button-label">Format table</span>
         </button>
 
     </div>
