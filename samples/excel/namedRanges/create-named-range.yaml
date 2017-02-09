@@ -1,1 +1,162 @@
+id: ''
+gist: ''
+source: EXCEL
+author: Microsoft
+name: Add a name to a cell
+description: Add a name to a cell
+script:
+  content: |+
+    $('#add-name').click(addName);
+
+    /** Add a name to a cell */
+    function addName() {
+      Excel.run(async (context) => {
+        let sheet: Excel.Worksheet;
+        try {
+          // Queue a command to add a new worksheet
+          sheet = context.workbook.worksheets.add();
+
+          // Call the helper to import data into the table
+          await queueAddName(sheet);
+
+          //Queue a command to activate the sheet
+          sheet.activate();
+
+          // Run all of the queued up commands
+          await context.sync();
+        }
+        catch (error) {
+          OfficeHelpers.Utilities.log(error);
+        }
+      })
+    }
+
+    // Import data into the table
+    async function queueAddName(sheet: Excel.Worksheet) {
+
+            // Queue a command to add a table to the sheet
+            let expensesTable = sheet.tables.add('A1:D1', true);
+            expensesTable.name = "ExpensesTable";
+
+            // Queue a command to set the header row
+            expensesTable.getHeaderRowRange().values = [["DATE", "MERCHANT", "CATEGORY", "AMOUNT"]];
+
+            let newData = transactions.map(item =>
+              [item.DATE, item.MERCHANT, item.CATEGORY, item.AMOUNT]);
+
+            expensesTable.rows.add(null, newData);
+
+            sheet.names.add("TotalAmount", "=SUM(ExpensesTable[AMOUNT])");
+
+            sheet.getRange("D13").values = [["=TotalAmount"]];
+
+            //Autofit columns and rows
+            sheet.getUsedRange().getEntireColumn().format.autofitColumns();
+            sheet.getUsedRange().getEntireRow().format.autofitRows();
+    }
+
+    const transactions = [    
+      {
+        "DATE":"1/1/2017",
+        "MERCHANT":"THE PHONE COMPANY",
+        "CATEGORY":"Communications",
+        "AMOUNT":"$120"
+      },
+      {
+        "DATE":"1/1/2017",
+        "MERCHANT":"SOUTHRIDGE VIDEO",
+        "CATEGORY":"Entertainment",
+        "AMOUNT":"$40"
+      },
+      {
+        "DATE":"1/1/2017",
+        "MERCHANT":"COHO WINERY",
+        "CATEGORY":"Restaurant",
+        "AMOUNT":"$47"
+      },
+      {
+        "DATE":"1/2/2017",
+        "MERCHANT":"CONTOSO, LTD",
+        "CATEGORY":"Shopping",
+        "AMOUNT":"$56"
+      },
+      {
+        "DATE":"1/2/2017",
+        "MERCHANT":"CONTOSO, LTD",
+        "CATEGORY":"Shopping",
+        "AMOUNT":"$110"
+      },
+      {
+        "DATE":"1/2/2017",
+        "MERCHANT":"LIBERTY BAKERY & CAFE",
+        "CATEGORY":"Groceries",
+        "AMOUNT":"$27"
+      },
+      {
+        "DATE":"1/2/2017",
+        "MERCHANT":"LIBERTY BAKERY & CAFE",
+        "CATEGORY":"Groceries",
+        "AMOUNT":"$38"
+      },
+      {
+        "DATE":"1/2/2017",
+        "MERCHANT":"NORTHWIND ELECTRIC CARS",
+        "CATEGORY":"Transportation",
+        "AMOUNT":"$42"
+      },
+      {
+        "DATE":"1/2/2017",
+        "MERCHANT":"BEST FOR YOU ORGANICS COMPANY",
+        "CATEGORY":"Groceries",
+        "AMOUNT":"$27"
+      },
+      {
+        "DATE":"1/3/2017",
+        "MERCHANT":"CONTOSO, LTD",
+        "CATEGORY":"Shopping",
+        "AMOUNT":"$25"
+      },
+      {
+        "DATE":"1/5/2017",
+        "MERCHANT":"MUNSON'S PICKLES AND PRESERVES FARM",
+        "CATEGORY":"Groceries",
+        "AMOUNT":"$178"
+      }
+    ];
+
+  language: typescript
+style:
+  content: /* Your style goes here */
+  language: css
+template:
+  content: |
+    <div id="content-header" class="ms-font-m">
+        <h1>Welcome</h1>
+    </div>
+
+    <div id="content-main" class="ms-font-m">
+        <p>This sample shows how to define a name for a cell or cell range using the Excel JavaScript API.</p>
+        <h3>Try it out</h3>
+        <button id="add-name" class="ms-Button">
+            <span class="ms-Button-label">Add a name to a cell</span>
+        </button>
+    </div>
+  language: html
+libraries: |-
+  // Office.js
+  https://appsforoffice.officeapps.live.com/afo/lib/beta/hosted/office.js
+
+  // NPM libraries
+  jquery
+  office-ui-fabric-js/dist/js/fabric.min.js
+  office-ui-fabric-js/dist/css/fabric.min.css
+  office-ui-fabric-js/dist/css/fabric.components.min.css
+  @microsoft/office-js-helpers/dist/office.helpers.min.js
+  core-js/client/core.min.js
+
+  // IntelliSense: Use dt~library_name for DefinitelyTyped or URLs to d.ts files
+  dt~office-js
+  dt~jquery
+  dt~core-js
+  @microsoft/office-js-helpers/dist/office.helpers.d.ts
 
