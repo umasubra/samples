@@ -2,7 +2,7 @@ id: ''
 gist: ''
 source: EXCEL
 author: Microsoft
-name: Add a name to a cell
+name: Create a named range
 description: Add a name to a cell
 script:
   content: |+
@@ -159,4 +159,3 @@ libraries: |-
   dt~jquery
   dt~core-js
   @microsoft/office-js-helpers/dist/office.helpers.d.ts
-
