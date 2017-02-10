@@ -1,0 +1,81 @@
+id: ''
+gist: ''
+source: EXCEL
+author: Microsoft
+name: List all named ranges in a workbook
+description: List all named ranges in a workbook
+script:
+  content: |
+    $('#list-named-ranges').click(listNamedRanges);
+
+    /** List all named ranges in the workbook */
+    function listNamedRanges() {
+      Excel.run(async (context) => {
+        let sheet: Excel.Worksheet;
+        try {
+
+          // Queue a command to add a new worksheet
+          sheet = context.workbook.worksheets.add();
+
+          // Load the property values of named ranges defined in the workbook
+          const namedRanges = context.workbook.names.load(["name","type", "visible"]);
+
+           // Run the queued up commands
+          await context.sync();
+
+          // Console log all the list
+          for (let i = 0; i < namedRanges.items.length; i++) {
+            console.log(namedRanges.items[i].name+" "+ namedRanges.items[i].visible+ " "+ namedRanges.items[i].type);
+          }
+
+          //Queue a command to activate the sheet
+          sheet.activate();
+
+          // Run all of the queued up commands
+          await context.sync();
+        }
+        catch (error) {
+          OfficeHelpers.Utilities.log(error);
+        }
+      })
+    }
+
+    // List named ranges
+    //async function queueListNamedRanges(sheet: Excel.Worksheet) {
+
+        
+  language: typescript
+style:
+  content: /* Your style goes here */
+  language: css
+template:
+  content: |
+    <div id="content-header" class="ms-font-m">
+        <h1>Welcome</h1>
+    </div>
+
+    <div id="content-main" class="ms-font-m">
+        <p>This sample shows how to list all the defined named ranges using the Excel JavaScript API.</p>
+        <h3>Try it out</h3>
+        <button id="list-named-ranges" class="ms-Button">
+            <span class="ms-Button-label">List named ranges </span>
+        </button>
+    </div>
+  language: html
+libraries: |-
+  // Office.js
+  https://appsforoffice.microsoft.com/lib/1/hosted/Office.js
+
+  // NPM libraries
+  jquery
+  office-ui-fabric-js/dist/js/fabric.min.js
+  office-ui-fabric-js/dist/css/fabric.min.css
+  office-ui-fabric-js/dist/css/fabric.components.min.css
+  @microsoft/office-js-helpers/dist/office.helpers.min.js
+  core-js/client/core.min.js
+
+  // IntelliSense: Use dt~library_name for DefinitelyTyped or URLs to d.ts files
+  dt~office-js
+  dt~jquery
+  dt~core-js
+  @microsoft/office-js-helpers/dist/office.helpers.d.ts
