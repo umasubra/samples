@@ -14,8 +14,13 @@ script:
         Excel.run(async (context) => {
             let sheet: Excel.Worksheet;
             try {
+                
+                //Call a helper to delete the playground sheet if it exists
+                deleteIfSheetExists("Playground");
+
                 // Queue a command to add a new worksheet
-                sheet = context.workbook.worksheets.add();
+                sheet = context.workbook.worksheets.add("Playground");
+
 
                 // Call the helper to create the table
                 await queueCreateTable(sheet);
@@ -31,7 +36,6 @@ script:
             }
         })
     }
-
 
     /** Get visible range from a filtered table*/
     function getVisibleRange() {
@@ -96,16 +100,32 @@ script:
                     dynamicCriteria: Excel.DynamicFilterCriteria.belowAverage
                 });
 
-
+                // Queue a command to get the visible view
                 var visibleRange = expensesTable.getDataBodyRange().getVisibleView().load("values");
 
                 await sheet.context.sync();
                
                 const visibleValues = visibleRange.values;
 
-                //Write the values to a different range
-                sheet.getRange("A21:D24").values = visibleValues;
+                // console log the visible values
+                console.log(visibleValues);
     }
+
+    function deleteIfSheetExists(sheetname:string){
+            Excel.run(async (context) => {
+                let sheet: Excel.Worksheet;
+                try {
+                    sheet = context.workbook.worksheets.getItemOrNullObject("Playground").delete();
+
+                    // Run all of the queued up commands
+                    await context.sync();
+                }
+                catch (error) {
+                     OfficeHelpers.Utilities.log(error);
+                }
+            })
+    }
+
 
   language: typescript
 style:
