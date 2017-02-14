@@ -14,8 +14,13 @@ script:
         Excel.run(async (context) => {
             let sheet: Excel.Worksheet;
             try {
-               // Queue a command to a new worksheet
-                sheet = context.workbook.worksheets.add();
+                
+                //Call a helper to delete the playground sheet if it exists
+                deleteIfSheetExists("Playground");
+
+                // Queue a command to add a new worksheet
+                sheet = context.workbook.worksheets.add("Playground");
+
 
                 // Call the helper to create the table
                 await queueCreateTable(sheet);
@@ -31,7 +36,6 @@ script:
             }
         })
     }
-
 
     /** Filter the data in the table*/
     function filterData() {
@@ -95,7 +99,21 @@ script:
                     dynamicCriteria: Excel.DynamicFilterCriteria.belowAverage
                 });
 
+    }
 
+    function deleteIfSheetExists(sheetname:string){
+            Excel.run(async (context) => {
+                let sheet: Excel.Worksheet;
+                try {
+                    sheet = context.workbook.worksheets.getItemOrNullObject("Playground").delete();
+
+                    // Run all of the queued up commands
+                    await context.sync();
+                }
+                catch (error) {
+                     OfficeHelpers.Utilities.log(error);
+                }
+            })
     }
 
   language: typescript
@@ -122,7 +140,7 @@ template:
   language: html
 libraries: |-
   // Office.js
-  https://appsforoffice.microsoft.com/lib/1/hosted/Office.js
+  https://appsforoffice.officeapps.live.com/afo/lib/beta/hosted/office.js
 
   // NPM libraries
   jquery
