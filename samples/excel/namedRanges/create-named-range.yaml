@@ -13,8 +13,11 @@ script:
       Excel.run(async (context) => {
         let sheet: Excel.Worksheet;
         try {
-          // Queue a command to add a new worksheet
-          sheet = context.workbook.worksheets.add();
+            //Call a helper to delete the playground sheet if it exists
+            deleteIfSheetExists("Playground");
+
+             // Queue a command to add a new worksheet
+            sheet = context.workbook.worksheets.add("Playground");
 
           // Call the helper to import data into the table
           await queueAddName(sheet);
@@ -46,8 +49,10 @@ script:
 
             expensesTable.rows.add(null, newData);
 
+            // Add a named range
             sheet.names.add("TotalAmount", "=SUM(ExpensesTable[AMOUNT])");
 
+            // Use the named range
             sheet.getRange("D13").values = [["=TotalAmount"]];
 
             //Autofit columns and rows
@@ -123,6 +128,22 @@ script:
         "AMOUNT":"$178"
       }
     ];
+
+    function deleteIfSheetExists(sheetname:string){
+            Excel.run(async (context) => {
+                let sheet: Excel.Worksheet;
+                try {
+                    sheet = context.workbook.worksheets.getItemOrNullObject("Playground").delete();
+
+                    // Run all of the queued up commands
+                    await context.sync();
+                }
+                catch (error) {
+                     OfficeHelpers.Utilities.log(error);
+                }
+            })
+    }
+
 
   language: typescript
 style:
