@@ -1,0 +1,148 @@
+id: ''
+gist: ''
+source: EXCEL
+author: Microsoft
+name: Perform conditional formatting
+description: Perform conditional formatting
+script:
+  content: |
+    $('#create-table').click(createTable);
+    $('#conditional-format').click(doConditionalFormatting);
+
+    /** Create a new table with some sample data */
+    function createTable() {
+        Excel.run(async (context) => {
+            let sheet: Excel.Worksheet;
+            try {
+                // Queue a command to cadd a new sheet
+                sheet = context.workbook.worksheets.add();
+
+                // Call the helper to create the table
+                await queueCreateTable(sheet);
+
+                //Queue a command to activate the sheet
+                sheet.activate();
+
+                // Run all of the queued up commands
+                await context.sync();
+            }
+            catch (error) {
+                OfficeHelpers.Utilities.log(error);
+            }
+        })
+    }
+
+    /** Perform conditional formatting */
+    function doConditionalFormatting() {
+        Excel.run(async (context) => {
+            let sheet: Excel.Worksheet;
+            try {
+                // Queue a command to get the sheet
+                sheet = context.workbook.worksheets.getActiveWorksheet();
+
+                // Call the helper to sort the table
+                await queueConditionalFormat(sheet);
+
+                // Run all of the queued up commands
+                await context.sync();
+            }
+            catch (error) {
+                OfficeHelpers.Utilities.log(error);
+            }
+        })
+    }
+
+
+    /** Helper to create the table */
+        async function queueCreateTable(sheet: Excel.Worksheet) {
+
+            // Queue a command to add a table to the sheet
+            let expensesTable = sheet.tables.add('A1:D1', true);
+            expensesTable.name = "ExpensesTable";
+
+            // Queue a command to set the header row
+            expensesTable.getHeaderRowRange().values = [["DATE", "MERCHANT", "CATEGORY", "AMOUNT"]];
+
+            // Queue a command to add rows to the table
+            expensesTable.rows.add(null, [
+                ["1/1/2017", "THE PHONE COMPANY", "Communications", "$120"],
+                ["1/2/2017", "NORTHWIND ELECTRIC CARS", "Transportation", "$142"],
+                ["1/5/2017", "BEST FOR YOU ORGANICS COMPANY", "Groceries", "$27"],
+                ["1/10/2017", "COHO VINEYARD", "Restaurant", "$33"],
+                ["1/11/2017", "BELLOWS COLLEGE", "Education", "$350"],
+                ["1/15/2017", "TREY RESEARCH", "Other", "$135"],
+                ["1/15/2017", "BEST FOR YOU ORGANICS COMPANY", "Groceries", "$97"]
+            ]);  
+
+            // Why is numberformat not working anymore?
+            // Queue a command to set the number format of the Amount column
+            //expensesTable.columns.getItem("AMOUNT").numberFormat = "$#";
+
+            //Autofit columns and rows
+            sheet.getUsedRange().getEntireColumn().format.autofitColumns();
+            sheet.getUsedRange().getEntireRow().format.autofitRows();
+        }
+
+        // Helper to do conditional formatting
+        async function queueConditionalFormat(sheet: Excel.Worksheet) {
+
+            // Queue a command to get the table
+            const expensesTable = sheet.tables.getItem("ExpensesTable");
+
+            // Queue a command to add conditional formatting
+            const range = expensesTable.getRange();
+            
+            //range.conditionalFormats.clearAll();
+            var cf = range.conditionalFormats.add(Excel.ConditionalFormatType.iconSet);
+            var cfLoaded = range.conditionalFormats.getItemAt(0).iconSetOrNullObject;
+            ctx.load(cfLoaded);
+            return ctx.sync()
+                .then(function () {
+                    var criteria = cfLoaded.criteria;
+                    criteria[1].operator = Excel.ConditionalIconCriterionOperator.greaterThan;
+                    criteria[1].type = Excel.ConditionalFormatIconRuleType.number;
+                    criteria[1].formula = "=30";
+                    cfLoaded.criteria = criteria;
+                    ctx.load(cfLoaded);
+                    return ctx.sync();
+                })
+        }
+  language: typescript
+style:
+  content: /* Your style goes here */
+  language: css
+template:
+  content: |
+    <div id="content-header" class="ms-font-m">
+        <h1>Welcome</h1>
+    </div>
+
+    <div id="content-main" class="ms-font-m">
+        <p>This sample shows how to sort the data in a table using the Excel JavaScript API.</p>
+        <h3>Set up<h3>
+            <button id="create-table" class="ms-Button">
+            <span class="ms-Button-label">Set up the table</span>
+        </button>
+        <h3>Try it out</h3>
+        <button id="conditional-format" class="ms-Button">
+            <span class="ms-Button-label">Do conditional formatting</span>
+        </button>
+    </div>
+  language: html
+libraries: |-
+  // Office.js
+  https://appsforoffice.officeapps.live.com/afo/lib/beta/hosted/office.js
+
+  // NPM libraries
+  jquery
+  office-ui-fabric-js/dist/js/fabric.min.js
+  office-ui-fabric-js/dist/css/fabric.min.css
+  office-ui-fabric-js/dist/css/fabric.components.min.css
+  @microsoft/office-js-helpers/dist/office.helpers.min.js
+  core-js/client/core.min.js
+
+  // IntelliSense: Use dt~library_name for DefinitelyTyped or URLs to d.ts files
+  dt~office-js
+  dt~jquery
+  dt~core-js
+  @microsoft/office-js-helpers/dist/office.helpers.d.ts
