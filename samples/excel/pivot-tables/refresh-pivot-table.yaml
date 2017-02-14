@@ -87,7 +87,7 @@ script:
         async function queueRefreshPivotTable(sheet: Excel.Worksheet) {
 
             // Queue a command to get the table
-            const expensesPivot = sheet.pivotTables.getItem("PivotTable");
+            const expensesPivot = sheet.pivotTables.getItem("PivotTable1");
 
             // Make a change in the data
             const expensesTable = sheet.tables.getItem("ExpensesTable");
