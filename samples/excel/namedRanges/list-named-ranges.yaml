@@ -1,4 +1,4 @@
-id: ciz5up6lf00034r6y6w6tx7s1
+id: ''
 gist: ''
 source: EXCEL
 author: Microsoft
@@ -11,11 +11,7 @@ script:
     /** List all named ranges in the workbook */
     function listNamedRanges() {
       Excel.run(async (context) => {
-        let sheet: Excel.Worksheet;
         try {
-
-          // Queue a command to add a new worksheet
-          sheet = context.workbook.worksheets.getActiveWorksheet();
 
           // Load the property values of named ranges defined in the workbook
           const namedRanges = context.workbook.names.load();
@@ -25,11 +21,8 @@ script:
 
           // Console log all the list
           for (let i = 0; i < namedRanges.items.length; i++) {
-            console.log(JSON.stringify(namedRanges.items[i]));
+            console.log(JSON.stringify(namedRanges.items[i]))+"\n";
           }
-
-          //Queue a command to activate the sheet
-          sheet.activate();
 
           // Run all of the queued up commands
           await context.sync();
@@ -40,8 +33,6 @@ script:
       })
     }
 
-    // List named ranges
-    //async function queueListNamedRanges(sheet: Excel.Worksheet) {
 
         
   language: typescript
