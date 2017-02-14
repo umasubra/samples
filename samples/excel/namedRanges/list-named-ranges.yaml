@@ -1,4 +1,4 @@
-id: ''
+id: ciz5up6lf00034r6y6w6tx7s1
 gist: ''
 source: EXCEL
 author: Microsoft
@@ -15,17 +15,17 @@ script:
         try {
 
           // Queue a command to add a new worksheet
-          sheet = context.workbook.worksheets.add();
+          sheet = context.workbook.worksheets.getActiveWorksheet();
 
           // Load the property values of named ranges defined in the workbook
-          const namedRanges = context.workbook.names.load(["name","type", "visible"]);
+          const namedRanges = context.workbook.names.load();
 
            // Run the queued up commands
           await context.sync();
 
           // Console log all the list
           for (let i = 0; i < namedRanges.items.length; i++) {
-            console.log(namedRanges.items[i].name+" "+ namedRanges.items[i].visible+ " "+ namedRanges.items[i].type);
+            console.log(JSON.stringify(namedRanges.items[i]));
           }
 
           //Queue a command to activate the sheet
@@ -64,7 +64,7 @@ template:
   language: html
 libraries: |-
   // Office.js
-  https://appsforoffice.microsoft.com/lib/1/hosted/Office.js
+  https://appsforoffice.officeapps.live.com/afo/lib/beta/hosted/office.js
 
   // NPM libraries
   jquery
