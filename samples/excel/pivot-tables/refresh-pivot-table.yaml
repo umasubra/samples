@@ -134,7 +134,13 @@ template:
         <button id="create-table" class="ms-Button">
             <span class="ms-Button-label"> Create table</span>
         </button>
-        <p>Now click inside the table and create a pivot table in the existing sheet at A15 using the Excel UI. Select the Amount and Category columns. Make sure the name of the pivot table in the UI matches with the name specified in code.
+        <p>Next, click inside the table and insert a pivot table using the Insert menu in Excel, specifying the following options.<p>
+                <ol>
+                <li>Choose Existing sheet.</li>
+                <li>Specify A15 as the location.</li>
+                <li>Select the Amount and Category columns.</li>
+                <li>Make sure the name of the pivot table in the UI matches with the name specified in code.</li>
+                </ol>
         <h3>Try it out</h3>
         <button id="refresh-pivot-table" class="ms-Button">
             <span class="ms-Button-label">Refresh pivot table</span>
