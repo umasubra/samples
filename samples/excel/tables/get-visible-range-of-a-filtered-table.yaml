@@ -78,9 +78,6 @@ script:
                 ["1/15/2017", "BEST FOR YOU ORGANICS COMPANY", "Groceries", "$97"]
             ]);  
 
-            // Queue a command to set the number format of the Amount column
-             //expensesTable.columns.getItem("AMOUNT").numberFormat = "$#";
-
             //Autofit columns and rows
             sheet.getUsedRange().getEntireColumn().format.autofitColumns();
             sheet.getUsedRange().getEntireRow().format.autofitRows();
@@ -111,6 +108,7 @@ script:
                 console.log(visibleValues);
     }
 
+    // Delete if the Playground sheet already exists
     function deleteIfSheetExists(sheetname:string){
             Excel.run(async (context) => {
                 let sheet: Excel.Worksheet;
