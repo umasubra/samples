@@ -8,12 +8,13 @@ script:
   content: |+
     $('#add-name').click(addName);
 
-    /** Add a name to a cell */
+    /** Add a named range */
     function addName() {
       Excel.run(async (context) => {
         let sheet: Excel.Worksheet;
         try {
-            //Call a helper to delete the playground sheet if it exists
+
+           //Call a helper to delete the playground sheet if it exists
             deleteIfSheetExists("Playground");
 
              // Queue a command to add a new worksheet
@@ -34,7 +35,7 @@ script:
       })
     }
 
-    // Import data into the table
+    /** Add a named range */
     async function queueAddName(sheet: Excel.Worksheet) {
 
             // Queue a command to add a table to the sheet
@@ -129,6 +130,7 @@ script:
       }
     ];
 
+    /** Delete if Playground sheet already exists */
     function deleteIfSheetExists(sheetname:string){
             Excel.run(async (context) => {
                 let sheet: Excel.Worksheet;
