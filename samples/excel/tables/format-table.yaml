@@ -1,11 +1,11 @@
-id: ciytqtehj00004r6zzb4wzav5
+id: cizojij8h00054r6yul6nulvg
 gist: ''
 source: EXCEL
 author: Microsoft
 name: Format table
 description: Format a table
 script:
-  content: |
+  content: |+
     $('#create-table').click(createTable);
     $('#format-table').click(formatTable);
 
@@ -14,8 +14,12 @@ script:
         Excel.run(async (context) => {
             let sheet: Excel.Worksheet;
             try {
+                //Call a helper to delete the playground sheet if it exists
+                deleteIfSheetExists("Playground");
+
                 // Queue a command to add a new worksheet
-                sheet = context.workbook.worksheets.add();
+                sheet = context.workbook.worksheets.add("Playground");
+
 
                 // Call the helper to create the table
                 await queueCreateTable(sheet);
@@ -104,6 +108,23 @@ script:
             sheet.getUsedRange().getEntireColumn().format.autofitColumns();
             sheet.getUsedRange().getEntireRow().format.autofitRows();
     }
+
+    // Delete if the Playground sheet already exists
+    function deleteIfSheetExists(sheetname:string){
+            Excel.run(async (context) => {
+                let sheet: Excel.Worksheet;
+                try {
+                    sheet = context.workbook.worksheets.getItemOrNullObject("Playground").delete();
+
+                    // Run all of the queued up commands
+                    await context.sync();
+                }
+                catch (error) {
+                     OfficeHelpers.Utilities.log(error);
+                }
+            })
+    }
+
   language: typescript
 style:
   content: ''
@@ -129,7 +150,7 @@ template:
   language: html
 libraries: |-
   // Office.js
-  https://appsforoffice.microsoft.com/lib/1/hosted/Office.js
+  https://appsforoffice.officeapps.live.com/afo/lib/beta/hosted/office.js 
 
   // NPM libraries
   jquery
