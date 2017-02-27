@@ -37,7 +37,7 @@ script:
     }
 
 
-    /** Refresh pivot table in the sheet*/
+    /** Refresh pivot table in the sheet */
     function refreshPivotTable() {
         Excel.run(async (context) => {
             let sheet: Excel.Worksheet;
@@ -57,7 +57,7 @@ script:
         })
     }
 
-    // Creates the table
+    /** Create the table */ 
     async function queueCreateTable(sheet: Excel.Worksheet) {
 
             // Queue a command to add a table to the sheet
@@ -78,25 +78,23 @@ script:
                 ["1/15/2017", "BEST FOR YOU ORGANICS COMPANY", "Groceries", "$97"]
             ]);  
 
-            // Queue a command to set the number format of the Amount column
-             //expensesTable.columns.getItem("AMOUNT").numberFormat = "$#";
-
             //Autofit columns and rows
             sheet.getUsedRange().getEntireColumn().format.autofitColumns();
             sheet.getUsedRange().getEntireRow().format.autofitRows();
         }
 
-        // Sort the table data
+        // Refresh pivot table
         async function queueRefreshPivotTable(sheet: Excel.Worksheet) {
 
             // Queue a command to get the table
-            const expensesPivot = sheet.pivotTables.getItem("PivotTable3");
+            const expensesPivot = sheet.pivotTables.getItem("PivotTable1");
 
             // Make a change in the data
             const expensesTable = sheet.tables.getItem("ExpensesTable");
 
             let range = expensesTable.columns.getItem("AMOUNT").getDataBodyRange().getRow(2).values = [["$500"]];
 
+            // Run all of the queued up commands
             await sheet.context.sync();
 
             // Queue a command to refresh the pivot table 
@@ -104,8 +102,9 @@ script:
 
         }
 
-        function deleteIfSheetExists(sheetname:string){
-            Excel.run(async (context) => {
+    /** Helper to delete the Playground sheet if already exists */
+    function deleteIfSheetExists(sheetname:string){
+        Excel.run(async (context) => {
                 let sheet: Excel.Worksheet;
                 try {
                     sheet = context.workbook.worksheets.getItemOrNullObject("Playground").delete();
@@ -116,8 +115,8 @@ script:
                 catch (error) {
                      OfficeHelpers.Utilities.log(error);
                 }
-            })
-        }
+        })
+    }
 
   language: typescript
 style:
