@@ -11,6 +11,7 @@ script:
     /** List all named ranges in the workbook */
     function listNamedRanges() {
       Excel.run(async (context) => {
+        let sheet: Excel.Worksheet;
         try {
 
           // Load the property values of named ranges defined in the workbook
