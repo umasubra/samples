@@ -78,29 +78,34 @@ script:
                 ["1/15/2017", "BEST FOR YOU ORGANICS COMPANY", "Groceries", "$97"]
             ]);  
 
-            // Queue a command to set the number format of the Amount column
-             //expensesTable.columns.getItem("AMOUNT").numberFormat = "$#";
-
             //Autofit columns and rows
             sheet.getUsedRange().getEntireColumn().format.autofitColumns();
             sheet.getUsedRange().getEntireRow().format.autofitRows();
         }
 
-    // Sort the table data
+    // Filter the table data
     async function queueFilterData(sheet: Excel.Worksheet) {
 
             // Queue a command to get the table
             const expensesTable = sheet.tables.getItem("ExpensesTable");
 
             // Queue a command to filter and show only below average transactions 
-                var filter = expensesTable.columns.getItem("AMOUNT").filter;
+                let filter = expensesTable.columns.getItem("AMOUNT").filter;
                 filter.apply({
                     filterOn: Excel.FilterOn.dynamic,
                     dynamicCriteria: Excel.DynamicFilterCriteria.belowAverage
                 });
 
+             // Queue a command to filter and show only certain categories
+                filter = expensesTable.columns.getItem("CATEGORY").filter;
+                filter.apply({
+                        filterOn: Excel.FilterOn.values,
+                        values: ["Restaurant", "Groceries"]
+                });
+
     }
 
+    // Delete the Playgorund sheet if it already exists
     function deleteIfSheetExists(sheetname:string){
             Excel.run(async (context) => {
                 let sheet: Excel.Worksheet;
