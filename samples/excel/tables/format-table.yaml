@@ -22,7 +22,6 @@ template:
         <button id="format-table" class="ms-Button">
             <span class="ms-Button-label">Format table</span>
         </button>
-
     </div>
   language: html
 libraries: |-
