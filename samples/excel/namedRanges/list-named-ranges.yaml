@@ -8,30 +8,24 @@ script:
   content: |
     $('#list-named-ranges').click(listNamedRanges);
 
-    /** List all named ranges in the workbook */
-    function listNamedRanges() {
-      Excel.run(async (context) => {
-        let sheet: Excel.Worksheet;
-        try {
+    async function listNamedRanges() {
+      try {
+        await Excel.run(async (context) => {
 
-          // Load the property values of named ranges defined in the workbook
           const namedRanges = context.workbook.names.load();
-
-           // Run the queued up commands
           await context.sync();
 
-          // Console log all the list
+          console.log("This workbook contains " + namedRanges.items.length + " named items.");
+
           for (let i = 0; i < namedRanges.items.length; i++) {
-            console.log(JSON.stringify(namedRanges.items[i]))+"\n";
+            console.log(JSON.stringify(namedRanges.items[i])) + "\n";
           }
-
-          // Run all of the queued up commands
           await context.sync();
-        }
+        })
+      }
         catch (error) {
           OfficeHelpers.Utilities.log(error);
         }
-      })
     }
 
 
@@ -42,10 +36,6 @@ style:
   language: css
 template:
   content: |
-    <div id="content-header" class="ms-font-m">
-        <h1>Welcome</h1>
-    </div>
-
     <div id="content-main" class="ms-font-m">
         <p>This sample shows how to list all the defined named ranges using the Excel JavaScript API.</p>
         <h3>Try it out</h3>
