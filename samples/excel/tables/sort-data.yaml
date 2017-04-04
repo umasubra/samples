@@ -1,32 +1,34 @@
-id: ciz5yaa9l00024r6yxd9rilap
+id: ''
 gist: ''
 source: EXCEL
 author: Microsoft
 name: Sort table data
 description: Sort table data
 script:
-  content: "$('#create-table').click(createTable);\r\n$('#sort-data').click(sortData);\r\n\r\n/** Create a new table with some sample data */\r\nfunction createTable() {\r\n    Excel.run(async (context) => {\r\n        let sheet: Excel.Worksheet;\r\n        try {\r\n\r\n            //Call a helper to delete the playground sheet if it exists\r\n            deleteIfSheetExists(\"Playground\");\r\n\r\n            // Queue a command to add a new worksheet\r\n            sheet = context.workbook.worksheets.add(\"Playground\");\r\n\r\n\r\n            // Call the helper to create the table\r\n            await queueCreateTable(sheet);\r\n\r\n            //Queue a command to activate the sheet\r\n            sheet.activate();\r\n\r\n            // Run all of the queued up commands\r\n            await context.sync();\r\n        }\r\n        catch (error) {\r\n            OfficeHelpers.Utilities.log(error);\r\n        }\r\n    })\r\n}\r\n\r\n/** Sort the data by Amount column */\r\nfunction sortData() {\r\n    Excel.run(async (context) => {\r\n        let sheet: Excel.Worksheet;\r\n        try {\r\n            // Queue a command to get the sheet\r\n            sheet = context.workbook.worksheets.getItem(\"Playground\");\r\n\r\n            // Call the helper to sort the table\r\n            await queueSortData(sheet);\r\n\r\n            // Run all of the queued up commands\r\n            await context.sync();\r\n        }\r\n        catch (error) {\r\n            OfficeHelpers.Utilities.log(error);\r\n        }\r\n    })\r\n}\r\n\r\n/** Helper to create the table */\r\n    async function queueCreateTable(sheet: Excel.Worksheet) {\r\n\r\n        // Queue a command to add a table to the sheet\r\n        let expensesTable = sheet.tables.add('A1:D1', true);\r\n        expensesTable.name = \"ExpensesTable\";\r\n\r\n        // Queue a command to set the header row\r\n        expensesTable.getHeaderRowRange().values = [[\"DATE\", \"MERCHANT\", \"CATEGORY\", \"AMOUNT\"]];\r\n\r\n        // Queue a command to add rows to the table\r\n        expensesTable.rows.add(null, [\r\n            [\"1/1/2017\", \"THE PHONE COMPANY\", \"Communications\", \"$120\"],\r\n            [\"1/2/2017\", \"NORTHWIND ELECTRIC CARS\", \"Transportation\", \"$142\"],\r\n            [\"1/5/2017\", \"BEST FOR YOU ORGANICS COMPANY\", \"Groceries\", \"$27\"],\r\n            [\"1/10/2017\", \"COHO VINEYARD\", \"Restaurant\", \"$33\"],\r\n            [\"1/11/2017\", \"BELLOWS COLLEGE\", \"Education\", \"$350\"],\r\n            [\"1/15/2017\", \"TREY RESEARCH\", \"Other\", \"$135\"],\r\n            [\"1/15/2017\", \"BEST FOR YOU ORGANICS COMPANY\", \"Groceries\", \"$97\"]\r\n        ]);  \r\n\r\n        //Autofit columns and rows\r\n        sheet.getUsedRange().getEntireColumn().format.autofitColumns();\r\n        sheet.getUsedRange().getEntireRow().format.autofitRows();\r\n    }\r\n\r\n    // Helper to sort the table data\r\n    async function queueSortData(sheet: Excel.Worksheet) {\r\n\r\n        // Queue a command to get the table\r\n        const expensesTable = sheet.tables.getItem(\"ExpensesTable\");\r\n\r\n        // Queue a command to sort by most expensive transactions at the top (Amount, descending order)\r\n            var sortRange = expensesTable.getDataBodyRange();\r\n            sortRange.sort.apply([\r\n\t\t\t\t{\r\n\t\t\t\t    key: 3,\r\n\t\t\t\t    ascending: false,\r\n\t\t\t\t},\r\n            ]);\r\n    }\r\n\r\n// Helper to delete the Playground sheet if it already exists\r\nfunction deleteIfSheetExists(sheetname:string){\r\n        Excel.run(async (context) => {\r\n            let sheet: Excel.Worksheet;\r\n            try {\r\n                sheet = context.workbook.worksheets.getItemOrNullObject(\"Playground\").delete();\r\n\r\n                // Run all of the queued up commands\r\n                await context.sync();\r\n            }\r\n            catch (error) {\r\n                 OfficeHelpers.Utilities.log(error);\r\n            }\r\n        })\r\n}\r\n"
+  content: "$(\"#setup\").click(setup);\r\n$(\"#sort-table\").click(sortTable);\r\n\r\nasync function sortTable() {\r\n\ttry {\r\n\t\tawait Excel.run(async (context) => {\r\n            const sheet = context.workbook.worksheets.getActiveWorksheet();\r\n\r\n            const expensesTable = sheet.tables.getItem(\"ExpensesTable\");\r\n\r\n            // Queue a command to sort by most expensive transactions at the top (Amount, descending order)\r\n            var sortRange = expensesTable.getDataBodyRange();\r\n\r\n            sortRange.sort.apply([\r\n\t\t\t\t{\r\n\t\t\t\t    key: 3,\r\n\t\t\t\t    ascending: false,\r\n\t\t\t\t},\r\n            ]);\r\n\r\n            await context.sync();\r\n       });\r\n\t }\r\n\tcatch (error) {\r\n\t\tOfficeHelpers.Utilities.log(error);\r\n\t}\r\n}\r\n\r\n/** Create a new table with sample data */\r\nasync function setup() {\r\n\ttry {\r\n\t\tawait Excel.run(async (context) => {\r\n\r\n\t\t\tawait OfficeHelpers.ExcelUtilities.forceCreateSheet(context.workbook, \"Playground\");\r\n\r\n\t\t\tconst sheet = context.workbook.worksheets.getItem(\"Playground\");\r\n\r\n\t\t\tconst expensesTable = sheet.tables.add(\"A1:D1\", true /*hasHeaders*/);\r\n\t\t\t expensesTable.name = \"ExpensesTable\";\r\n\r\n\t\t\texpensesTable.getHeaderRowRange().values = [[\"Date\", \"Merchant\", \"Category\", \"Amount\"]];\r\n\r\n\t\t\texpensesTable.rows.add(null /*add at the end*/, [\r\n\t\t\t[\"1/1/2017\", \"The Phone Company\", \"Communications\", \"$120\"],\r\n\t\t\t[\"1/2/2017\", \"Northwind Electric Cars\", \"Transportation\", \"$142\"],\r\n\t\t\t[\"1/5/2017\", \"Best For You Organics Company\", \"Groceries\", \"$27\"],\r\n\t\t\t[\"1/10/2017\", \"Coho Vineyard\", \"Restaurant\", \"$33\"],\r\n\t\t\t[\"1/11/2017\", \"Bellows College\", \"Education\", \"$350\"],\r\n\t\t\t[\"1/15/2017\", \"Trey Research\", \"Other\", \"$135\"],\r\n\t\t\t[\"1/15/2017\", \"Best For You Organics Company\", \"Groceries\", \"$97\"]\r\n\t\t]);\r\n\r\n\t\tif (Office.context.requirements.isSetSupported(\"ExcelApi\", 1.2)) {\r\n\t\t\tsheet.getUsedRange().format.autofitColumns();\r\n\t\t\tsheet.getUsedRange().format.autofitRows();\r\n\t\t}\r\n\t    \tsheet.activate();\r\n\r\n\t\t    await context.sync();\r\n\t    });\r\n    }\r\n\tcatch (error) {\r\n\t\tOfficeHelpers.Utilities.log(error);\r\n\t}\r\n}\r\n"
   language: typescript
 style:
-  content: ''
+  content: "section.samples {\r\n    margin-top: 20px;\r\n}\r\n\r\nsection.samples .ms-Button, section.setup .ms-Button {\r\n    display: block;\r\n    margin-bottom: 5px;\r\n    margin-left: 20px;\r\n    min-width: 80px;\r\n}\r\n"
   language: css
 template:
-  content: "<div id=\"content-header\" class=\"ms-font-m\">\r\n    <h1>Welcome</h1>\r\n</div>\r\n\r\n<div id=\"content-main\" class=\"ms-font-m\">\r\n    <p>This sample shows how to sort the data in a table using the Excel JavaScript API.</p>\r\n    <h3>Set up<h3>\r\n        <button id=\"create-table\" class=\"ms-Button\">\r\n        <span class=\"ms-Button-label\">Set up the table</span>\r\n    </button>\r\n    <h3>Try it out</h3>\r\n    <button id=\"sort-data\" class=\"ms-Button\">\r\n        <span class=\"ms-Button-label\">Sort data</span>\r\n    </button>\r\n</div>"
+  content: "<section class=\"ms-font-m\">\r\n    <p>This sample shows how to filter the data in a table using different filter types using the Excel JavaScript API.</p>\r\n</section>\r\n\r\n<section class=\"setup ms-font-m\">\r\n    <h3>Set up</h3>\r\n    <button id=\"setup\" class=\"ms-Button\">\r\n        <span class=\"ms-Button-label\">Create table</span>\r\n    </button>\r\n</section>\r\n\r\n<section class=\"samples ms-font-m\">\r\n    <h3>Try it out</h3>\r\n    <button id=\"sort-table\" class=\"ms-Button\">\r\n        <span class=\"ms-Button-label\">Sort table</span>\r\n    </button>\r\n</section>\r\n"
   language: html
-libraries: |-
+libraries: |+
   // Office.js
-  https://appsforoffice.officeapps.live.com/afo/lib/beta/hosted/office.js
+  https://appsforoffice.microsoft.com/lib/1/hosted/office.js
+
+  // CSS Libraries
+  office-ui-fabric-js@1.4.0/dist/css/fabric.min.css
+  office-ui-fabric-js@1.4.0/dist/css/fabric.components.min.css
 
   // NPM libraries
-  jquery
-  office-ui-fabric-js/dist/js/fabric.min.js
-  office-ui-fabric-js/dist/css/fabric.min.css
-  office-ui-fabric-js/dist/css/fabric.components.min.css
-  @microsoft/office-js-helpers/dist/office.helpers.min.js
-  core-js/client/core.min.js
+  core-js@2.4.1/client/core.min.js
+  @microsoft/office-js-helpers@0.6.0-beta.7/dist/office.helpers.min.js
+  jquery@3.1.1
 
-  // IntelliSense: Use dt~library_name for DefinitelyTyped or URLs to d.ts files
-  dt~office-js
-  dt~jquery
-  dt~core-js
-  @microsoft/office-js-helpers/dist/office.helpers.d.ts
+  // IntelliSense: @types/library or node_modules paths or URL to d.ts files
+  @types/office-js
+  @types/core-js
+  @microsoft/office-js-helpers@0.6.0-beta.7/dist/office.helpers.d.ts
+  @types/jquery
+
