@@ -5,43 +5,107 @@ author: Microsoft
 name: Convert a range to a table
 description: Convert a range to a table
 script:
-  content: "$('#create-range').click(createRange);\n$('#convert-range-to-table').click(convertRangeToTable);\n\n/** Create a range */\nfunction createRange() {\n    Excel.run(async (context) => {\n        let sheet: Excel.Worksheet;\n        try {\n            //Call a helper to delete the playground sheet if it exists\n            deleteIfSheetExists(\"Playground\");\n\n            // Queue a command to add a new worksheet\n            sheet = context.workbook.worksheets.add(\"Playground\");\n\n\n            // Call the helper to create the table\n            await queueCreateRange(sheet);\n\n            //Queue a command to activate the sheet\n            sheet.activate();\n\n            // Run all of the queued up commands\n            await context.sync();\n        }\n        catch (error) {\n           OfficeHelpers.Utilities.log(error);\n        }\n    })\n}\n\n/** Convert a range into a table */\nfunction convertRangeToTable() {\n    Excel.run(async (context) => {\n        let sheet: Excel.Worksheet;\n        try {\n\n           // Get the playground sheet\n           sheet = context.workbook.worksheets.getActiveWorksheet();\n\n            // Call the helper to convert the range to table\n            await queueConvertRangeToTable(sheet);\n\n            // Run all of the queued up commands\n            await context.sync();\n        }\n        catch (error) {\n           OfficeHelpers.Utilities.log(error);\n        }\n    })\n}\n\n// Creates the range\nasync function queueCreateRange(sheet: Excel.Worksheet) {\n        \n\t\t\t//Create an array containing sample data\n\t\t\tconst values = [[\"Product\", \"Qtr1\", \"Qtr2\", \"Qtr3\", \"Qtr4\"],\n\t\t\t\t\t\t  [\"Frames\", 5000, 7000, 6544, 4377],\n\t\t\t\t\t\t  [\"Saddles\", 400, 323, 276, 651],\n\t\t\t\t\t\t  [\"Brake levers\", 12000, 8766, 8456, 9812],\n\t\t\t\t\t\t  [\"Chains\", 1550, 1088, 692, 853],\n\t\t\t\t\t\t  [\"Mirrors\", 225, 600, 923, 544],\n\t\t\t\t\t\t  [\"Spokes\", 6005, 7634, 4589, 8765]];\n\n\t\t\t//Queue a command to write the sample data to the specified range\n\t\t\tlet range = sheet.getRange(\"A1:E7\");\n      range.values = values;\n\n      // Queue a command to bold the header row\n\t\t\tsheet.getRange(\"A1:E1\").format.font.bold = true;\n\n        //Autofit columns and rows\n        sheet.getUsedRange().getEntireColumn().format.autofitColumns();\n        sheet.getUsedRange().getEntireRow().format.autofitRows();\n    }\n\n// Create the table\nasync function queueConvertRangeToTable(sheet: Excel.Worksheet) {\n\n        // Queue a command to add a table to the sheet\n        let expensesTable = sheet.tables.add('A1:E7', true);\n        expensesTable.name = \"ExpensesTable\";\n\n        //Autofit columns and rows\n        sheet.getUsedRange().getEntireColumn().format.autofitColumns();\n        sheet.getUsedRange().getEntireRow().format.autofitRows();\n}\n\n// Delete if the Playground sheet already exists\nfunction deleteIfSheetExists(sheetname:string){\n        Excel.run(async (context) => {\n            let sheet: Excel.Worksheet;\n            try {\n                sheet = context.workbook.worksheets.getItemOrNullObject(\"Playground\").delete();\n\n                // Run all of the queued up commands\n                await context.sync();\n            }\n            catch (error) {\n                 OfficeHelpers.Utilities.log(error);\n            }\n        })\n}\n\n\n\n\n"
+  content: |+
+    $('#setup').click(setup);
+    $('#convert-range-to-table').click(convertRangeToTable);
+
+    async function convertRangeToTable() {
+        try {
+            await Excel.run(async (context) => {
+
+                const sheet = context.workbook.worksheets.getActiveWorksheet();
+
+                let expensesTable = sheet.tables.add('A1:E7', true);
+
+                expensesTable.name = "ExpensesTable";
+
+                await context.sync();
+            });
+        }
+        catch (error) {
+               OfficeHelpers.Utilities.log(error);
+        }
+    }
+
+    /** Create a range */
+    async function setup() {
+        try {
+            await Excel.run(async (context) => {
+
+                await OfficeHelpers.ExcelUtilities.forceCreateSheet(context.workbook, "Playground");;
+
+                const sheet = context.workbook.worksheets.getItem("Playground");
+
+                const values = [["Product", "Qtr1", "Qtr2", "Qtr3", "Qtr4"],
+                ["Frames", 5000, 7000, 6544, 4377],
+                ["Saddles", 400, 323, 276, 651],
+                ["Brake levers", 12000, 8766, 8456, 9812],
+                ["Chains", 1550, 1088, 692, 853],
+                ["Mirrors", 225, 600, 923, 544],
+                ["Spokes", 6005, 7634, 4589, 8765]];
+
+                const range = sheet.getRange("A1:E7");
+                range.values = values;
+
+                sheet.getRange("A1:E1").format.font.bold = true;
+
+                sheet.getUsedRange().format.autofitColumns();
+                sheet.getUsedRange().format.autofitRows();
+
+                sheet.activate();
+
+
+                await context.sync();
+            });
+        }
+        catch (error) {
+            OfficeHelpers.Utilities.log(error);
+        }
+    }
+
+
+
+
+
   language: typescript
 style:
-  content: ''
+  content: "section.samples {\r\n    margin-top: 20px;\r\n}\r\n\r\nsection.samples .ms-Button, section.setup .ms-Button {\r\n    display: block;\r\n    margin-bottom: 5px;\r\n    margin-left: 20px;\r\n    min-width: 80px;\r\n}\r\n"
   language: css
 template:
-  content: |-
-    <div id="content-header" class="ms-font-m">
-        <h1>Welcome</h1>
-    </div>
+  content: |
+    <section class="ms-font-m">
+        <p>This sample shows how to convert a range to a table using the Excel JavaScript API.</p>
+    </section>
 
-    <div id="content-main" class="ms-font-m">
-        <p>This sample shows how to convert a range to a tble using the Excel JavaScript API.</p>
+    <section class="setup ms-font-m">
         <h3>Set up</h3>
-        <button id="create-range" class="ms-Button">
+        <button id="setup" class="ms-Button">
             <span class="ms-Button-label">Create range</span>
         </button>
+    </section>
+
+    <section class="samples ms-font-m">
         <h3>Try it out</h3>
         <button id="convert-range-to-table" class="ms-Button">
-            <span class="ms-Button-label">Convert range to table</span>
+                <span class="ms-Button-label">Convert range to table</span>
         </button>
-    </div>
+    </section>
   language: html
-libraries: |-
+libraries: |
   // Office.js
-  https://appsforoffice.officeapps.live.com/afo/lib/beta/hosted/office.js 
+  https://appsforoffice.microsoft.com/lib/1/hosted/office.js
+
+  // CSS Libraries
+  office-ui-fabric-js@1.4.0/dist/css/fabric.min.css
+  office-ui-fabric-js@1.4.0/dist/css/fabric.components.min.css
 
   // NPM libraries
-  jquery
-  office-ui-fabric-js/dist/js/fabric.min.js
-  office-ui-fabric-js/dist/css/fabric.min.css
-  office-ui-fabric-js/dist/css/fabric.components.min.css
-  @microsoft/office-js-helpers/dist/office.helpers.min.js
-  core-js/client/core.min.js
+  core-js@2.4.1/client/core.min.js
+  @microsoft/office-js-helpers@0.6.0-beta.7/dist/office.helpers.min.js
+  jquery@3.1.1
 
-  // IntelliSense: Use dt~library_name for DefinitelyTyped or URLs to d.ts files
-  dt~office-js
-  dt~jquery
-  dt~core-js
-  @microsoft/office-js-helpers/dist/office.helpers.d.ts
+  // IntelliSense: @types/library or node_modules paths or URL to d.ts files
+  @types/office-js
+  @types/core-js
+  @microsoft/office-js-helpers@0.6.0-beta.7/dist/office.helpers.d.ts
+  @types/jquery
