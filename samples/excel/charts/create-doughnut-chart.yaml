@@ -12,11 +12,10 @@ script:
     function createChart() {
         try {
             Excel.run(async (context) => {
-                let sheet: Excel.Worksheet;
 
-                sheet = context.workbook.worksheets.getActiveWorksheet();
+                const sheet = context.workbook.worksheets.getActiveWorksheet();
 
-                let expensesByCategoryTable = sheet.tables.getItem("ExpensesByCategoryTable");
+                const expensesByCategoryTable = sheet.tables.getItem("ExpensesByCategoryTable");
 
                 const dataRange = expensesByCategoryTable.getDataBodyRange();
 
@@ -93,22 +92,24 @@ style:
   content: "section.samples {\r\n    margin-top: 20px;\r\n}\r\n\r\nsection.samples .ms-Button, section.setup .ms-Button {\r\n    display: block;\r\n    margin-bottom: 5px;\r\n    margin-left: 20px;\r\n    min-width: 80px;\r\n}\r\n"
   language: css
 template:
-  content: |
-    <div id="content-header" class="ms-font-m">
-        <h1>Welcome</h1>
-    </div>
-
-    <div id="content-main" class="ms-font-m">
+  content: |-
+    <section class="ms-font-m">
         <p>This sample shows how to create a doughnut chart using the Excel JavaScript API.</p>
+    </section>
+
+    <section class="setup ms-font-m">
         <h3>Set up</h3>
         <button id="setup" class="ms-Button">
             <span class="ms-Button-label">Create table</span>
         </button>
+    </section>
+
+    <section class="samples ms-font-m">
         <h3>Try it out</h3>
         <button id="create-chart" class="ms-Button">
             <span class="ms-Button-label">Create chart</span>
         </button>
-    </div>
+    </section>
   language: html
 libraries: |
   // Office.js
