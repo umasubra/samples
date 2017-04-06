@@ -2,13 +2,95 @@ id: ''
 gist: ''
 source: EXCEL
 author: Microsoft
-name: 'Create a doughnut chart   - 1 '
+name: Create a doughnut chart
 description: Create a doughnut chart
 script:
-  content: "$('#create-table').click(setup);\n$('#create-chart').click(createChart);\n\n/** Create chart **/\nfunction createChart() {\n    Excel.run(async (context) => {\n        try {\n            let sheet = context.workbook.worksheets.getActiveWorksheet();\n\n            // Call the helper to create the chart\n             let expensesByCategoryTable = sheet.tables.getItem(\"ExpensesByCategoryTable\");\n        \n            const dataRange = expensesByCategoryTable.getDataBodyRange();\n\n            //Create the chart\n\t\t    var categoryChart = sheet.charts.add(\"3dpie\", dataRange, \"auto\");\n\n            categoryChart.setPosition(\"A15\", \"F25\");\n            categoryChart.title.text = \"Expenses By Category\";\n            categoryChart.title.format.font.size = 10;\n            categoryChart.title.format.font.name = \"Corbel\";\n            categoryChart.title.format.font.color = \"#41AEBD\";\n            categoryChart.legend.format.font.name = \"Corbel\";\n            categoryChart.legend.format.font.size = 8;\n            categoryChart.legend.position = \"right\";\n            categoryChart.dataLabels.showPercentage = true;\n            categoryChart.dataLabels.format.font.size = 8;\n            categoryChart.dataLabels.format.font.color = \"white\";\n            let points = categoryChart.series.getItemAt(0).points;\n            points.getItemAt(0).format.fill.setSolidColor(\"#0C8DB9\");\n            points.getItemAt(1).format.fill.setSolidColor(\"#B1D9F7\");\n            points.getItemAt(2).format.fill.setSolidColor(\"#4C66C5\");\n            points.getItemAt(3).format.fill.setSolidColor(\"#5CC9EF\");\n            points.getItemAt(4).format.fill.setSolidColor(\"#5CCBAD\");\n            points.getItemAt(5).format.fill.setSolidColor(\"#A5E750\");\n                  \n\n            sheet.getUsedRange().getEntireColumn().format.autofitColumns();\n            sheet.getUsedRange().getEntireRow().format.autofitRows();\n\n            await context.sync();\n        }\n        catch (error) {\n            OfficeHelpers.Utilities.log(error);\n        }\n    })\n}\n\n/** Create a new table with some sample data */\nasync function setup() {\n    try {\n        await Excel.run(async (context) => {\n\n            await ExcelUtilities.forceCreateSheet(context, \"Playground\");\n\n            let sheet = context.workbook.worksheets.getItem(\"Playground\");\n\n\n            // Create the table\n            let expensesTable = sheet.tables.add('A1:B1', true);\n            expensesTable.name = \"ExpensesByCategoryTable\";\n\n            expensesTable.getHeaderRowRange().values = [[\"Category\", \"Expense\"]];\n\n            expensesTable.rows.add(null, [\n                [\"Groceries\", 5000],\n                [\"Entertaiment\", 400],\n                [\"Education\", 12000],\n                [\"Charity\", 1550],\n                [\"Transportation\", 225],\n                [\"Other\", 6005]\n            ]);\n\n            sheet.getUsedRange().getEntireColumn().format.autofitColumns();\n            sheet.getUsedRange().getEntireRow().format.autofitRows();\n\n            sheet.activate();\n\n            await context.sync();\n        });\n    }\n    catch (error) {\n         OfficeHelpers.Utilities.log(error);\n    }\n}\nclass ExcelUtilities {\n\tstatic async forceCreateSheet(context: Excel.RequestContext, sheetName: string): Promise<Excel.Worksheet> {\n\n\t\tif (sheetName == null || sheetName.trim() === '') {\n\t\t\t//throw new error('Sheet name cannot be blank.');\n\t\t}\n\n\t\tconst newSheet = context.workbook.worksheets.add();\n\n\t\tif (Office.context.requirements.isSetSupported('ExcelApi', 1.4)) {\n\t\t\tconsole.log(\"On 1.4\");\n\t\t\t(context as any).workbook.worksheets.getItemOrNullObject(sheetName).delete();\n\t\t}\n\t\telse {\n\t\t\tawait context.sync();\n\t\t\ttry {\n\t\t\t\tconst oldSheet = (context as Excel.RequestContext).workbook.worksheets.getItem(sheetName);\n\t\t\t\toldSheet.delete();\n\t\t\t\tawait context.sync();\n\t\t\t}\n\t\t\tcatch (error) {\n\t\t\t\tif (error instanceof OfficeExtension.Error && error.code === Excel.ErrorCodes.itemNotFound) {\n\t\t\t\t\t// all good\n\t\t\t\t}\n\t\t\t\telse {\n\t\t\t\t\tthrow new error('Unexpected error while trying to delete sheet.', error);\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t\tnewSheet.name = sheetName;\n\t\treturn newSheet;\n\t}\n}\n\n"
+  content: |
+    $('#setup').click(setup);
+    $('#create-chart').click(createChart);
+
+    function createChart() {
+        try {
+            Excel.run(async (context) => {
+                let sheet: Excel.Worksheet;
+
+                sheet = context.workbook.worksheets.getActiveWorksheet();
+
+                let expensesByCategoryTable = sheet.tables.getItem("ExpensesByCategoryTable");
+
+                const dataRange = expensesByCategoryTable.getDataBodyRange();
+
+                var categoryChart = sheet.charts.add("3dpie", dataRange, "auto");
+
+                categoryChart.setPosition("A15", "F25");
+                categoryChart.title.text = "Expenses By Category";
+                categoryChart.title.format.font.size = 10;
+                categoryChart.title.format.font.name = "Corbel";
+                categoryChart.title.format.font.color = "#41AEBD";
+                categoryChart.legend.format.font.name = "Corbel";
+                categoryChart.legend.format.font.size = 8;
+                categoryChart.legend.position = "right";
+                categoryChart.dataLabels.showPercentage = true;
+                categoryChart.dataLabels.format.font.size = 8;
+                categoryChart.dataLabels.format.font.color = "white";
+                let points = categoryChart.series.getItemAt(0).points;
+                points.getItemAt(0).format.fill.setSolidColor("#0C8DB9");
+                points.getItemAt(1).format.fill.setSolidColor("#B1D9F7");
+                points.getItemAt(2).format.fill.setSolidColor("#4C66C5");
+                points.getItemAt(3).format.fill.setSolidColor("#5CC9EF");
+                points.getItemAt(4).format.fill.setSolidColor("#5CCBAD");
+                points.getItemAt(5).format.fill.setSolidColor("#A5E750");
+
+
+                sheet.getUsedRange().getEntireColumn().format.autofitColumns();
+                sheet.getUsedRange().getEntireRow().format.autofitRows();
+
+                await context.sync();
+            });
+        }
+        catch (error) {
+                OfficeHelpers.Utilities.log(error);
+        }
+    }
+
+    async function setup() {
+        try {
+            await Excel.run(async (context) => {
+
+                await OfficeHelpers.ExcelUtilities.forceCreateSheet(context.workbook, "Playground");
+
+                const sheet = context.workbook.worksheets.getItem("Playground");
+
+
+                const expensesTable = sheet.tables.add('A1:B1', true);
+                expensesTable.name = "ExpensesByCategoryTable";
+
+                expensesTable.getHeaderRowRange().values = [["Category", "Expense"]];
+
+                expensesTable.rows.add(null, [
+                    ["Groceries", 5000],
+                    ["Entertaiment", 400],
+                    ["Education", 12000],
+                    ["Charity", 1550],
+                    ["Transportation", 225],
+                    ["Other", 6005]
+                ]);
+
+                sheet.getUsedRange().getEntireColumn().format.autofitColumns();
+                sheet.getUsedRange().getEntireRow().format.autofitRows();
+
+                sheet.activate();
+
+                await context.sync();
+            });
+        }
+        catch (error) {
+             OfficeHelpers.Utilities.log(error);
+        }
+    }
   language: typescript
 style:
-  content: ''
+  content: "section.samples {\r\n    margin-top: 20px;\r\n}\r\n\r\nsection.samples .ms-Button, section.setup .ms-Button {\r\n    display: block;\r\n    margin-bottom: 5px;\r\n    margin-left: 20px;\r\n    min-width: 80px;\r\n}\r\n"
   language: css
 template:
   content: |
@@ -19,7 +101,7 @@ template:
     <div id="content-main" class="ms-font-m">
         <p>This sample shows how to create a doughnut chart using the Excel JavaScript API.</p>
         <h3>Set up</h3>
-        <button id="create-table" class="ms-Button">
+        <button id="setup" class="ms-Button">
             <span class="ms-Button-label">Create table</span>
         </button>
         <h3>Try it out</h3>
@@ -28,20 +110,21 @@ template:
         </button>
     </div>
   language: html
-libraries: |-
+libraries: |
   // Office.js
-  https://appsforoffice.microsoft.com/lib/1/hosted/Office.js
+  https://appsforoffice.microsoft.com/lib/1/hosted/office.js
+
+  // CSS Libraries
+  office-ui-fabric-js@1.4.0/dist/css/fabric.min.css
+  office-ui-fabric-js@1.4.0/dist/css/fabric.components.min.css
 
   // NPM libraries
-  jquery
-  office-ui-fabric-js/dist/js/fabric.min.js
-  office-ui-fabric-js/dist/css/fabric.min.css
-  office-ui-fabric-js/dist/css/fabric.components.min.css
-  @microsoft/office-js-helpers/dist/office.helpers.min.js
-  core-js/client/core.min.js
+  core-js@2.4.1/client/core.min.js
+  @microsoft/office-js-helpers@0.6.0-beta.7/dist/office.helpers.min.js
+  jquery@3.1.1
 
-  // IntelliSense: Use dt~library_name for DefinitelyTyped or URLs to d.ts files
-  dt~office-js
-  dt~jquery
-  dt~core-js
-  @microsoft/office-js-helpers/dist/office.helpers.d.ts
+  // IntelliSense: @types/library or node_modules paths or URL to d.ts files
+  @types/office-js
+  @types/core-js
+  @microsoft/office-js-helpers@0.6.0-beta.7/dist/office.helpers.d.ts
+  @types/jquery
