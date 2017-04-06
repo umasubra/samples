@@ -10,55 +10,44 @@ script:
 
     /** Add a named range */
     function addName() {
-      Excel.run(async (context) => {
-        let sheet: Excel.Worksheet;
-        try {
+      try {
+        Excel.run(async (context) => {
 
-           //Call a helper to delete the playground sheet if it exists
-            deleteIfSheetExists("Playground");
+          await OfficeHelpers.ExcelUtilities.forceCreateSheet(context.workbook, "Playground");
 
-             // Queue a command to add a new worksheet
-            sheet = context.workbook.worksheets.add("Playground");
+          const sheet = context.workbook.worksheets.getItem("Playground");
 
-          // Call the helper to import data into the table
-          await queueAddName(sheet);
+          let expensesTable = sheet.tables.add('A1:D1', true);
+          expensesTable.name = "ExpensesTable";
 
-          //Queue a command to activate the sheet
+          expensesTable.getHeaderRowRange().values = [["DATE", "MERCHANT", "CATEGORY", "AMOUNT"]];
+
+          let newData = transactions.map(item =>
+            [item.DATE, item.MERCHANT, item.CATEGORY, item.AMOUNT]);
+
+          expensesTable.rows.add(null, newData);
+
+          sheet.names.add("TotalAmount", "=SUM(ExpensesTable[AMOUNT])");
+
+          sheet.getRange("D13").values = [["=TotalAmount"]];
+
+          sheet.getUsedRange().getEntireColumn().format.autofitColumns();
+          sheet.getUsedRange().getEntireRow().format.autofitRows();
+
           sheet.activate();
 
-          // Run all of the queued up commands
           await context.sync();
+          });
         }
         catch (error) {
           OfficeHelpers.Utilities.log(error);
         }
-      })
     }
 
     /** Add a named range */
     async function queueAddName(sheet: Excel.Worksheet) {
 
-            // Queue a command to add a table to the sheet
-            let expensesTable = sheet.tables.add('A1:D1', true);
-            expensesTable.name = "ExpensesTable";
 
-            // Queue a command to set the header row
-            expensesTable.getHeaderRowRange().values = [["DATE", "MERCHANT", "CATEGORY", "AMOUNT"]];
-
-            let newData = transactions.map(item =>
-              [item.DATE, item.MERCHANT, item.CATEGORY, item.AMOUNT]);
-
-            expensesTable.rows.add(null, newData);
-
-            // Add a named range
-            sheet.names.add("TotalAmount", "=SUM(ExpensesTable[AMOUNT])");
-
-            // Use the named range
-            sheet.getRange("D13").values = [["=TotalAmount"]];
-
-            //Autofit columns and rows
-            sheet.getUsedRange().getEntireColumn().format.autofitColumns();
-            sheet.getUsedRange().getEntireRow().format.autofitRows();
     }
 
     const transactions = [    
@@ -130,55 +119,40 @@ script:
       }
     ];
 
-    /** Delete if Playground sheet already exists */
-    function deleteIfSheetExists(sheetname:string){
-            Excel.run(async (context) => {
-                let sheet: Excel.Worksheet;
-                try {
-                    sheet = context.workbook.worksheets.getItemOrNullObject("Playground").delete();
-
-                    // Run all of the queued up commands
-                    await context.sync();
-                }
-                catch (error) {
-                     OfficeHelpers.Utilities.log(error);
-                }
-            })
-    }
-
 
   language: typescript
 style:
-  content: /* Your style goes here */
+  content: "section.samples {\r\n    margin-top: 20px;\r\n}\r\n\r\nsection.samples .ms-Button, section.setup .ms-Button {\r\n    display: block;\r\n    margin-bottom: 5px;\r\n    margin-left: 20px;\r\n    min-width: 80px;\r\n}\r\n"
   language: css
 template:
-  content: |
-    <div id="content-header" class="ms-font-m">
-        <h1>Welcome</h1>
-    </div>
+  content: |+
+    <section class="ms-font-m">
+        <p>This sample shows how to create a named item using the Excel JavaScript API.</p>
+    </section>
 
-    <div id="content-main" class="ms-font-m">
-        <p>This sample shows how to define a name for a cell or cell range using the Excel JavaScript API.</p>
+    <section class="samples ms-font-m">
         <h3>Try it out</h3>
         <button id="add-name" class="ms-Button">
-            <span class="ms-Button-label">Add a name to a cell</span>
+            <span class="ms-Button-label">Add a name to a formula</span>
         </button>
-    </div>
+    </section>
+
   language: html
-libraries: |-
+libraries: |
   // Office.js
-  https://appsforoffice.officeapps.live.com/afo/lib/beta/hosted/office.js
+  https://appsforoffice.microsoft.com/lib/1/hosted/office.js
+
+  // CSS Libraries
+  office-ui-fabric-js@1.4.0/dist/css/fabric.min.css
+  office-ui-fabric-js@1.4.0/dist/css/fabric.components.min.css
 
   // NPM libraries
-  jquery
-  office-ui-fabric-js/dist/js/fabric.min.js
-  office-ui-fabric-js/dist/css/fabric.min.css
-  office-ui-fabric-js/dist/css/fabric.components.min.css
-  @microsoft/office-js-helpers/dist/office.helpers.min.js
-  core-js/client/core.min.js
+  core-js@2.4.1/client/core.min.js
+  @microsoft/office-js-helpers@0.6.0-beta.7/dist/office.helpers.min.js
+  jquery@3.1.1
 
-  // IntelliSense: Use dt~library_name for DefinitelyTyped or URLs to d.ts files
-  dt~office-js
-  dt~jquery
-  dt~core-js
-  @microsoft/office-js-helpers/dist/office.helpers.d.ts
+  // IntelliSense: @types/library or node_modules paths or URL to d.ts files
+  @types/office-js
+  @types/core-js
+  @microsoft/office-js-helpers@0.6.0-beta.7/dist/office.helpers.d.ts
+  @types/jquery
