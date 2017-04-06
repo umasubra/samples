@@ -5,7 +5,7 @@ author: Microsoft
 name: List all named ranges in a workbook
 description: List all named ranges in a workbook
 script:
-  content: |
+  content: |-
     $('#list-named-ranges').click(listNamedRanges);
 
     async function listNamedRanges() {
@@ -27,37 +27,38 @@ script:
           OfficeHelpers.Utilities.log(error);
         }
     }
-
-
-        
   language: typescript
 style:
-  content: /* Your style goes here */
+  content: "section.samples {\r\n    margin-top: 20px;\r\n}\r\n\r\nsection.samples .ms-Button, section.setup .ms-Button {\r\n    display: block;\r\n    margin-bottom: 5px;\r\n    margin-left: 20px;\r\n    min-width: 80px;\r\n}\r\n"
   language: css
 template:
-  content: |
-    <div id="content-main" class="ms-font-m">
-        <p>This sample shows how to list all the defined named ranges using the Excel JavaScript API.</p>
+  content: |-
+    <section class="ms-font-m">
+        <p>This sample shows how to list all the defined named ranges using the Excel JavaScript API. Note that this snippet lists the results in the console below.</p>
+    </section>
+
+    <section class="samples ms-font-m">
         <h3>Try it out</h3>
         <button id="list-named-ranges" class="ms-Button">
-            <span class="ms-Button-label">List named ranges </span>
+            <span class="ms-Button-label">List named ranges</span>
         </button>
-    </div>
+    </section>
   language: html
-libraries: |-
-  // Office.js
-  https://appsforoffice.officeapps.live.com/afo/lib/beta/hosted/office.js
+libraries: |2
+    // Office.js
+    https://appsforoffice.microsoft.com/lib/1/hosted/office.js
 
-  // NPM libraries
-  jquery
-  office-ui-fabric-js/dist/js/fabric.min.js
-  office-ui-fabric-js/dist/css/fabric.min.css
-  office-ui-fabric-js/dist/css/fabric.components.min.css
-  @microsoft/office-js-helpers/dist/office.helpers.min.js
-  core-js/client/core.min.js
+    // CSS Libraries
+    office-ui-fabric-js@1.4.0/dist/css/fabric.min.css
+    office-ui-fabric-js@1.4.0/dist/css/fabric.components.min.css
 
-  // IntelliSense: Use dt~library_name for DefinitelyTyped or URLs to d.ts files
-  dt~office-js
-  dt~jquery
-  dt~core-js
-  @microsoft/office-js-helpers/dist/office.helpers.d.ts
+    // NPM libraries
+    core-js@2.4.1/client/core.min.js
+    @microsoft/office-js-helpers@0.6.0-beta.7/dist/office.helpers.min.js
+    jquery@3.1.1
+
+    // IntelliSense: @types/library or node_modules paths or URL to d.ts files
+    @types/office-js
+    @types/core-js
+    @microsoft/office-js-helpers@0.6.0-beta.7/dist/office.helpers.d.ts
+    @types/jquery
