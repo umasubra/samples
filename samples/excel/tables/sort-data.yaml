@@ -11,7 +11,7 @@ style:
   content: "section.samples {\r\n    margin-top: 20px;\r\n}\r\n\r\nsection.samples .ms-Button, section.setup .ms-Button {\r\n    display: block;\r\n    margin-bottom: 5px;\r\n    margin-left: 20px;\r\n    min-width: 80px;\r\n}\r\n"
   language: css
 template:
-  content: "<section class=\"ms-font-m\">\r\n    <p>This sample shows how to filter the data in a table using different filter types using the Excel JavaScript API.</p>\r\n</section>\r\n\r\n<section class=\"setup ms-font-m\">\r\n    <h3>Set up</h3>\r\n    <button id=\"setup\" class=\"ms-Button\">\r\n        <span class=\"ms-Button-label\">Create table</span>\r\n    </button>\r\n</section>\r\n\r\n<section class=\"samples ms-font-m\">\r\n    <h3>Try it out</h3>\r\n    <button id=\"sort-table\" class=\"ms-Button\">\r\n        <span class=\"ms-Button-label\">Sort table</span>\r\n    </button>\r\n</section>\r\n"
+  content: "<section class=\"ms-font-m\">\r\n    <p>This sample shows how to sort the data in a table  using the Excel JavaScript API.</p>\r\n</section>\r\n\r\n<section class=\"setup ms-font-m\">\r\n    <h3>Set up</h3>\r\n    <button id=\"setup\" class=\"ms-Button\">\r\n        <span class=\"ms-Button-label\">Create table</span>\r\n    </button>\r\n</section>\r\n\r\n<section class=\"samples ms-font-m\">\r\n    <h3>Try it out</h3>\r\n    <button id=\"sort-table\" class=\"ms-Button\">\r\n        <span class=\"ms-Button-label\">Sort table</span>\r\n    </button>\r\n</section>\r\n"
   language: html
 libraries: |+
   // Office.js
