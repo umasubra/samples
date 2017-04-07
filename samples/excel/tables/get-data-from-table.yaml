@@ -1,184 +1,52 @@
-id: cizojf45u00044r6y6kd329m8
+id: ''
 gist: ''
 source: EXCEL
 author: Microsoft
 name: Get data from a table
 description: Get data from a table
 script:
-  content: |+
-    $('#create-table').click(createTable);
-    $('#get-data').click(getData);
-
-    /** Create a new table with some sample data */
-    function createTable() {
-        Excel.run(async (context) => {
-            let sheet: Excel.Worksheet;
-            try {
-                //Call a helper to delete the playground sheet if it exists
-                deleteIfSheetExists("Playground");
-
-                // Queue a command to add a new worksheet
-                sheet = context.workbook.worksheets.add("Playground");
-
-
-                // Call the helper to create the table
-                await queueCreateTable(sheet);
-
-                //Queue a command to activate the sheet
-                sheet.activate();
-
-                // Run all of the queued up commands
-                await context.sync();
-            }
-            catch (error) {
-
-            }
-        })
-    }
-
-    /** Get data from the table*/
-    function getData() {
-        Excel.run(async (context) => {
-            let sheet: Excel.Worksheet;
-            try {
-                // Queue a command to get the sheet
-                sheet = context.workbook.worksheets.getActiveWorksheet();
-
-                // Call the helper to get the data from the table
-                await queueGetData(sheet);
-
-                // Run all of the queued up commands
-                await context.sync();
-            }
-            catch (error) {
-
-            }
-        })
-    }
-
-     // Creates the table
-     async function queueCreateTable(sheet: Excel.Worksheet) {
-
-            // Queue a command to add a table to the sheet
-            let expensesTable = sheet.tables.add('A1:D1', true);
-            expensesTable.name = "ExpensesTable";
-
-            // Queue a command to set the header row
-            expensesTable.getHeaderRowRange().values = [["DATE", "MERCHANT", "CATEGORY", "AMOUNT"]];
-
-            // Queue a command to add rows to the table
-            expensesTable.rows.add(null, [
-                ["1/1/2017", "THE PHONE COMPANY", "Communications", "$120"],
-                ["1/2/2017", "NORTHWIND ELECTRIC CARS", "Transportation", "$142"],
-                ["1/5/2017", "BEST FOR YOU ORGANICS COMPANY", "Groceries", "$27"],
-                ["1/10/2017", "COHO VINEYARD", "Restaurant", "$33"],
-                ["1/11/2017", "BELLOWS COLLEGE", "Education", "$350"],
-                ["1/15/2017", "TREY RESEARCH", "Other", "$135"],
-                ["1/15/2017", "BEST FOR YOU ORGANICS COMPANY", "Groceries", "$97"]
-            ]);  
-
-            // Queue a command to set the number format of the Amount column
-             //expensesTable.columns.getItem("AMOUNT").numberFormat = "$#";
-
-            //Autofit columns and rows
-            sheet.getUsedRange().getEntireColumn().format.autofitColumns();
-            sheet.getUsedRange().getEntireRow().format.autofitRows();
-        }
-
-    // Get the data from the table and write to a range
-    async function queueGetData(sheet: Excel.Worksheet) {
-
-            // Queue a command to add a table to the sheet
-            let expensesTable = sheet.tables.getItem("ExpensesTable");
-
-            // Queue a command to get the values in the header range 
-            let headerRange = expensesTable.getHeaderRowRange().load("values");
-
-           // Queue a command to get the values in the table body 
-            let bodyRange = expensesTable.getDataBodyRange().load("values");
-
-           // Queue a command to get the values in the MERCHANT column
-            let columnRange = expensesTable.columns.getItem("MERCHANT").getDataBodyRange().load("values");
-
-            // Queue a command to get the values in the second row
-           let rowRange= expensesTable.rows.getItemAt(1).load("values");
-
-            await sheet.context.sync();
-
-            const headerValues = headerRange.values;
-            const bodyValues = bodyRange.values;
-            const merchantColumnValues = columnRange.values;
-            const secondRowValues = rowRange.values;
-
-            //Write headings to a different range
-            sheet.getRange("A20:D20").values = headerValues;
-
-            //Write table body to a different range
-            sheet.getRange("A21:D27").values = bodyValues;
-
-            //Write merchant column body to a different range
-            sheet.getRange("B30:B36").values = merchantColumnValues;
-
-            //Write second row va;ues to a different range
-            sheet.getRange("A17:D17").values = secondRowValues;
-
-            //Autofit columns and rows
-            sheet.getUsedRange().getEntireColumn().format.autofitColumns();
-            sheet.getUsedRange().getEntireRow().format.autofitRows();
-    }
-
-    // Delete if the Playground sheet already exists
-    function deleteIfSheetExists(sheetname:string){
-            Excel.run(async (context) => {
-                let sheet: Excel.Worksheet;
-                try {
-                    sheet = context.workbook.worksheets.getItemOrNullObject("Playground").delete();
-
-                    // Run all of the queued up commands
-                    await context.sync();
-                }
-                catch (error) {
-                     OfficeHelpers.Utilities.log(error);
-                }
-            })
-    }
-
+  content: "$('#setup').click(setup);\n$('#get-data-from-table').click(getData);\n\nasync function getData() {\n    try {\n        await Excel.run(async (context) => {\n\n        const sheet = context.workbook.worksheets.getActiveWorksheet();\n\n       let expensesTable = sheet.tables.getItem(\"ExpensesTable\");\n\n        let headerRange = expensesTable.getHeaderRowRange().load(\"values\");\n\n        let bodyRange = expensesTable.getDataBodyRange().load(\"values\");\n\n        let columnRange = expensesTable.columns.getItem(\"MERCHANT\").getDataBodyRange().load(\"values\");\n\n       let rowRange= expensesTable.rows.getItemAt(1).load(\"values\");\n\n        await sheet.context.sync();\n\n        const headerValues = headerRange.values;\n        const bodyValues = bodyRange.values;\n        const merchantColumnValues = columnRange.values;\n        const secondRowValues = rowRange.values;\n\n        sheet.getRange(\"A18:A18\").values = \"Results\";\n\n        sheet.getRange(\"A20:D20\").values = headerValues;\n\n        sheet.getRange(\"A21:D27\").values = bodyValues;\n\n        sheet.getRange(\"B30:B36\").values = merchantColumnValues;\n\n        sheet.getRange(\"A17:D17\").values = secondRowValues;\n            await context.sync();\n        });\n    }\n    catch (error) {\n                OfficeHelpers.Utilities.log(error);\n    }\n}\n\n/** Create a new table with some sample data */\nasync function setup() {\n    try {\n    \tawait Excel.run(async (context) => {\n\n\t\t\tawait OfficeHelpers.ExcelUtilities.forceCreateSheet(context.workbook, \"Playground\");\n\n\t\t\tconst sheet = context.workbook.worksheets.getItem(\"Playground\");\n\n\t\t\tconst expensesTable = sheet.tables.add('A1:D1', true /*hasHeaders*/);\n\t\t\t expensesTable.name = \"ExpensesTable\";\n\n\t\t\texpensesTable.getHeaderRowRange().values = [[\"Date\", \"Merchant\", \"Category\", \"Amount\"]];\n\n\t\t\texpensesTable.rows.add(null /*add at the end*/, [\n\t\t\t[\"1/1/2017\", \"The Phone Company\", \"Communications\", \"$120\"],\n\t\t\t[\"1/2/2017\", \"Northwind Electric Cars\", \"Transportation\", \"$142\"],\n\t\t\t[\"1/5/2017\", \"Best For You Organics Company\", \"Groceries\", \"$27\"],\n\t\t\t[\"1/10/2017\", \"Coho Vineyard\", \"Restaurant\", \"$33\"],\n\t\t\t[\"1/11/2017\", \"Bellows College\", \"Education\", \"$350\"],\n\t\t\t[\"1/15/2017\", \"Trey Research\", \"Other\", \"$135\"],\n\t\t\t[\"1/15/2017\", \"Best For You Organics Company\", \"Groceries\", \"$97\"]\n\t\t]);\n\n\t\tif (Office.context.requirements.isSetSupported(\"ExcelApi\", 1.2)) {\n\t\t\t\t\tsheet.getUsedRange().format.autofitColumns();\n\t\tsheet.getUsedRange().format.autofitRows();\n\t\t}\n\n\t    \tsheet.activate();\n\n\t\t    await context.sync();\n\t    });\n    }\n\tcatch (error) {\n\t\tOfficeHelpers.Utilities.log(error);\n\t}\n} \n"
   language: typescript
 style:
-  content: ''
+  content: "section.samples {\r\n    margin-top: 20px;\r\n}\r\n\r\nsection.samples .ms-Button, section.setup .ms-Button {\r\n    display: block;\r\n    margin-bottom: 5px;\r\n    margin-left: 20px;\r\n    min-width: 80px;\r\n}\r\n"
   language: css
 template:
-  content: |
-    <div id="content-header" class="ms-font-m">
-        <h1>Welcome</h1>
-    </div>
+  content: |2+
+        <section class="ms-font-m">
+            <p>This sample shows how to get data from a table and write it to the sheet using the Excel JavaScript API.</p>
+        </section>
 
-    <div id="content-main" class="ms-font-m">
-        <p>This sample shows how to get data from a table and write to a range in the worksheet using the Excel JavaScript API.</p>
-        <h3>Set up</h3>
-        <button id="create-table" class="ms-Button">
-            <span class="ms-Button-label">Create table</span>
-        </button>
-        <h3>Try it out</h3>
-        <button id="get-data" class="ms-Button">
-            <span class="ms-Button-label">Get data</span>
-        </button>
-    </div>
+        <section class="setup ms-font-m">
+            <h3>Set up</h3>
+            <button id="setup" class="ms-Button">
+                <span class="ms-Button-label">Create table</span>
+            </button>
+        </section>
+
+        <section class="samples ms-font-m">
+            <h3>Try it out</h3>
+            <button id="get-data-from-table" class="ms-Button">
+                <span class="ms-Button-label">Get data from a table</span>
+            </button>
+        </section>
+
+
   language: html
-libraries: |-
-  // Office.js
-  https://appsforoffice.officeapps.live.com/afo/lib/beta/hosted/office.js 
+libraries: |2
+    // Office.js
+    https://appsforoffice.microsoft.com/lib/1/hosted/office.js
 
-  // NPM libraries
-  jquery
-  office-ui-fabric-js/dist/js/fabric.min.js
-  office-ui-fabric-js/dist/css/fabric.min.css
-  office-ui-fabric-js/dist/css/fabric.components.min.css
-  @microsoft/office-js-helpers/dist/office.helpers.min.js
-  core-js/client/core.min.js
+    // CSS Libraries
+    office-ui-fabric-js@1.4.0/dist/css/fabric.min.css
+    office-ui-fabric-js@1.4.0/dist/css/fabric.components.min.css
 
-  // IntelliSense: Use dt~library_name for DefinitelyTyped or URLs to d.ts files
-  dt~office-js
-  dt~jquery
-  dt~core-js
-  @microsoft/office-js-helpers/dist/office.helpers.d.ts
+    // NPM libraries
+    core-js@2.4.1/client/core.min.js
+    @microsoft/office-js-helpers@0.6.0-beta.7/dist/office.helpers.min.js
+    jquery@3.1.1
+
+    // IntelliSense: @types/library or node_modules paths or URL to d.ts files
+    @types/office-js
+    @types/core-js
+    @microsoft/office-js-helpers@0.6.0-beta.7/dist/office.helpers.d.ts
+    @types/jquery
