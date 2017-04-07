@@ -6,8 +6,8 @@ name: Convert a range to a table
 description: Convert a range to a table
 script:
   content: |+
-    $('#setup').click(setup);
-    $('#convert-range-to-table').click(convertRangeToTable);
+    $("#setup").click(setup);
+    $("#convert-range-to-table").click(convertRangeToTable);
 
     async function convertRangeToTable() {
         try {
