@@ -1,15 +1,14 @@
-id: ''
+id: cj184ufjv00054r6z84ari51t
 gist: ''
 source: EXCEL
 author: Microsoft
 name: Create a named range
-description: Add a name to a cell
+description: Create a named range for a formula
 script:
   content: |+
-    $('#add-name').click(addName);
+    $("#add-name").click(addName);
 
-    /** Add a named range */
-    function addName() {
+    async function addName() {
       try {
         Excel.run(async (context) => {
 
@@ -17,7 +16,7 @@ script:
 
           const sheet = context.workbook.worksheets.getItem("Playground");
 
-          let expensesTable = sheet.tables.add('A1:D1', true);
+          let expensesTable = sheet.tables.add("A1:D1", true);
           expensesTable.name = "ExpensesTable";
 
           expensesTable.getHeaderRowRange().values = [["DATE", "MERCHANT", "CATEGORY", "AMOUNT"]];
@@ -29,10 +28,10 @@ script:
 
           sheet.names.add("TotalAmount", "=SUM(ExpensesTable[AMOUNT])");
 
-          sheet.getRange("D13").values = [["=TotalAmount"]];
+          sheet.getRange("D11").values = [["=TotalAmount"]];
 
-          sheet.getUsedRange().getEntireColumn().format.autofitColumns();
-          sheet.getUsedRange().getEntireRow().format.autofitRows();
+          sheet.getUsedRange().format.autofitColumns();
+          sheet.getUsedRange().format.autofitRows();
 
           sheet.activate();
 
@@ -44,78 +43,60 @@ script:
         }
     }
 
-    /** Add a named range */
-    async function queueAddName(sheet: Excel.Worksheet) {
-
-
-    }
-
     const transactions = [    
       {
         "DATE":"1/1/2017",
-        "MERCHANT":"THE PHONE COMPANY",
+        "MERCHANT":"The Phone Company",
         "CATEGORY":"Communications",
         "AMOUNT":"$120"
       },
       {
         "DATE":"1/1/2017",
-        "MERCHANT":"SOUTHRIDGE VIDEO",
+        "MERCHANT":"SouthRidge Video",
         "CATEGORY":"Entertainment",
         "AMOUNT":"$40"
       },
       {
         "DATE":"1/1/2017",
-        "MERCHANT":"COHO WINERY",
+        "MERCHANT":"Coho Winery",
         "CATEGORY":"Restaurant",
         "AMOUNT":"$47"
       },
       {
         "DATE":"1/2/2017",
-        "MERCHANT":"CONTOSO, LTD",
+        "MERCHANT":"Contoso, Ltd",
         "CATEGORY":"Shopping",
         "AMOUNT":"$56"
       },
       {
         "DATE":"1/2/2017",
-        "MERCHANT":"CONTOSO, LTD",
+        "MERCHANT":"Contoso, Ltd",
         "CATEGORY":"Shopping",
         "AMOUNT":"$110"
       },
       {
         "DATE":"1/2/2017",
-        "MERCHANT":"LIBERTY BAKERY & CAFE",
+        "MERCHANT":"Liberty Bakery & Cafe",
         "CATEGORY":"Groceries",
         "AMOUNT":"$27"
       },
       {
         "DATE":"1/2/2017",
-        "MERCHANT":"LIBERTY BAKERY & CAFE",
+        "MERCHANT":"Liberty Bakery & Cafe",
         "CATEGORY":"Groceries",
         "AMOUNT":"$38"
       },
       {
         "DATE":"1/2/2017",
-        "MERCHANT":"NORTHWIND ELECTRIC CARS",
+        "MERCHANT":"Northwind Electric Cars",
         "CATEGORY":"Transportation",
         "AMOUNT":"$42"
       },
       {
         "DATE":"1/2/2017",
-        "MERCHANT":"BEST FOR YOU ORGANICS COMPANY",
+        "MERCHANT":"Best For You Organics Company",
         "CATEGORY":"Groceries",
         "AMOUNT":"$27"
-      },
-      {
-        "DATE":"1/3/2017",
-        "MERCHANT":"CONTOSO, LTD",
-        "CATEGORY":"Shopping",
-        "AMOUNT":"$25"
-      },
-      {
-        "DATE":"1/5/2017",
-        "MERCHANT":"MUNSON'S PICKLES AND PRESERVES FARM",
-        "CATEGORY":"Groceries",
-        "AMOUNT":"$178"
       }
     ];
 
@@ -127,13 +108,13 @@ style:
 template:
   content: |+
     <section class="ms-font-m">
-        <p>This sample shows how to create a named item using the Excel JavaScript API.</p>
+        <p>This sample shows how to create a named range using the Excel JavaScript API.</p>
     </section>
 
     <section class="samples ms-font-m">
         <h3>Try it out</h3>
         <button id="add-name" class="ms-Button">
-            <span class="ms-Button-label">Add a name to a formula</span>
+            <span class="ms-Button-label">Create a named range for a formula</span>
         </button>
     </section>
 
