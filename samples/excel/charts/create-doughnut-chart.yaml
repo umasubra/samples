@@ -6,10 +6,10 @@ name: Create a doughnut chart
 description: Create a doughnut chart
 script:
   content: |
-    $('#setup').click(setup);
-    $('#create-chart').click(createChart);
+    $("#setup").click(setup);
+    $("#create-doughnut-chart").click(createChart);
 
-    function createChart() {
+    async function createChart() {
         try {
             Excel.run(async (context) => {
 
@@ -19,7 +19,7 @@ script:
 
                 const dataRange = expensesByCategoryTable.getDataBodyRange();
 
-                var categoryChart = sheet.charts.add("3dpie", dataRange, "auto");
+                let categoryChart = sheet.charts.add("3dpie", dataRange, "auto");
 
                 categoryChart.setPosition("A15", "F25");
                 categoryChart.title.text = "Expenses By Category";
@@ -41,8 +41,8 @@ script:
                 points.getItemAt(5).format.fill.setSolidColor("#A5E750");
 
 
-                sheet.getUsedRange().getEntireColumn().format.autofitColumns();
-                sheet.getUsedRange().getEntireRow().format.autofitRows();
+                sheet.getUsedRange().format.autofitColumns();
+                sheet.getUsedRange().format.autofitRows();
 
                 await context.sync();
             });
@@ -106,8 +106,8 @@ template:
 
     <section class="samples ms-font-m">
         <h3>Try it out</h3>
-        <button id="create-chart" class="ms-Button">
-            <span class="ms-Button-label">Create chart</span>
+        <button id="create-doughnut-chart" class="ms-Button">
+            <span class="ms-Button-label">Create a doughnut chart</span>
         </button>
     </section>
   language: html
